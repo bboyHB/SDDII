@@ -82,8 +82,8 @@ class GenerateDefectModel(BaseModel):
         Parameters:
             input: a dictionary that contains the data itself and its metadata information.
         """
-        self.real_data = input['A'].to(self.device)  # get image data A
-        self.image_paths = input['A_paths' if AtoB else 'B_paths']  # get image paths
+        self.real_data = input['real'].to(self.device)  # get image data A
+        self.image_paths = input['real_path']
 
     def forward(self):
         """Run forward pass. This will be called by both functions <optimize_parameters> and <test>."""
