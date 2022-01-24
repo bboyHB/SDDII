@@ -62,7 +62,7 @@ def extract_class4_for_generate_defect_gan():
     root = os.path.join(labeled_DAGM_path, 'Class4_relabel')
     content = ('Train', 'Test')
     for t in content:
-        out_dir = f'DAGM_Class4_filted/{t}'
+        out_dir = f'DAGM_Class4_filted/{t.lower()}'
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
         t_path = os.path.join(root, t)
