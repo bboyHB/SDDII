@@ -554,10 +554,7 @@ class VanillaGenerator(nn.Module):
                                         kernel_size=4, stride=2,
                                         padding=1, bias=use_bias)
             upnorm = norm_layer(outer_nc)
-            if i == 0:
-                sequence += [upconv, upnorm]
-            else:
-                sequence += [uprelu, upconv, upnorm]
+            sequence += [uprelu, upconv, upnorm]
         for _ in range(times_nc_changes):
             outer_nc = inner_nc // 2
             uprelu = nn.ReLU(True)
@@ -574,8 +571,7 @@ class VanillaGenerator(nn.Module):
         sequence += [uprelu, upconv, nn.Tanh()]
         self.model = nn.Sequential(*sequence)
 
-    def forward(self):
-        z = torch.randn(self.noise_nc)
+    def forward(self, z):
         return self.model(z)
 
 

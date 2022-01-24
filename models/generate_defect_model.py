@@ -83,12 +83,13 @@ class GenerateDefectModel(BaseModel):
         Parameters:
             input: a dictionary that contains the data itself and its metadata information.
         """
+        self.noise = input['noise'].to(self.device)
         self.real_data = input['real'].to(self.device)  # get image data A
         self.image_paths = input['real_path']
 
     def forward(self):
         """Run forward pass. This will be called by both functions <optimize_parameters> and <test>."""
-        self.output = self.netG()  # generate output image given the input z
+        self.output = self.netG(self.noise)  # generate output image given the input z
 
     def backward_D(self):
         """Calculate GAN loss for the discriminator"""
