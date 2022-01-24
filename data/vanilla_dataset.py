@@ -58,7 +58,6 @@ class VanillaDataset(BaseDataset):
         # define the default transform function. You can use <base_dataset.get_transform>; You can also define your custom transform function
         self.transform = get_transform(opt=opt, grayscale=self.isGray)
 
-
     def __getitem__(self, index):
         """Return a data point and its metadata information.
 
