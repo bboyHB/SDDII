@@ -11,6 +11,8 @@ You need to implement the following functions:
     -- <__getitem__>: Return a data point and its metadata information.
     -- <__len__>: Return the number of images.
 """
+import os
+
 from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
@@ -45,7 +47,8 @@ class VanillaDataset(BaseDataset):
         # save the option and dataset root
         BaseDataset.__init__(self, opt)
         # get the image paths of your dataset;
-        self.image_paths = sorted(make_dataset(opt.dataroot, opt.max_dataset_size))
+        self.dir_real = os.path.join(opt.dataroot, opt.phase)
+        self.image_paths = sorted(make_dataset(self.dir_real, opt.max_dataset_size))
         # You can call sorted(make_dataset(self.root, opt.max_dataset_size)) to get all the image paths under the directory self.root
         # define the default transform function. You can use <base_dataset.get_transform>; You can also define your custom transform function
         self.transform = get_transform(opt)
