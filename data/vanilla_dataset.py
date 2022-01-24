@@ -49,13 +49,14 @@ class VanillaDataset(BaseDataset):
         # save the option and dataset root
         BaseDataset.__init__(self, opt)
         # get the image paths of your dataset;
+        self.isGray = opt.input_nc == 1
         times_nc_changes = 3
         self.noise_nc = opt.ngf * (2 ** times_nc_changes)
         self.dir_real = os.path.join(opt.dataroot, opt.phase)
         self.image_paths = sorted(make_dataset(self.dir_real, opt.max_dataset_size))
         # You can call sorted(make_dataset(self.root, opt.max_dataset_size)) to get all the image paths under the directory self.root
         # define the default transform function. You can use <base_dataset.get_transform>; You can also define your custom transform function
-        self.transform = get_transform(opt)
+        self.transform = get_transform(opt=opt, grayscale=self.isGray)
 
 
     def __getitem__(self, index):
