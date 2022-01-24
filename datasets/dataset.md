@@ -7,6 +7,7 @@ python train.py --dataroot ./datasets/RSDDs1_cycle --model cycle_gan --name RSDD
 python train.py --dataroot ./datasets/RSDDs2_cycle --model cycle_gan --name RSDDs2_cycle --load_size 256 --crop_size 256
 python train.py --dataroot ./datasets/KSDD_cycle --model cycle_gan --name KSDD_cycle --load_size 512 --crop_size 512
 python train.py --dataroot ./datasets/DAGM_Class4_cycle/ --model cycle_gan --name DAGM_Class4_cycle --load_size 512 --crop_size 512 --n_epochs 25 --n_epochs_decay 25 --input_nc 1 --output_nc 1 --four_rotate --netG unet_256
+python train.py --dataroot ./datasets/DAGM_Class4_filted/ --model generate_defect --name DAGM_Class4_filted --load_size 512 --crop_size 512 --n_epochs 25 --n_epochs_decay 25 --input_nc 1 --output_nc 1 --four_rotate
 
 
 利用cyclegan的R生成pix2pix的训练数据集，运行

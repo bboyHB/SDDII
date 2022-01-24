@@ -547,14 +547,17 @@ class VanillaGenerator(nn.Module):
         times_nc_changes = 3
         self.noise_nc = ngf * (2 ** times_nc_changes)
         inner_nc = self.noise_nc
-        for _ in range(num_ups - times_nc_changes - 1):
+        for i in range(num_ups - times_nc_changes - 1):
             outer_nc = inner_nc
             uprelu = nn.ReLU(True)
             upconv = nn.ConvTranspose2d(inner_nc, outer_nc,
                                         kernel_size=4, stride=2,
                                         padding=1, bias=use_bias)
             upnorm = norm_layer(outer_nc)
-            sequence += [uprelu, upconv, upnorm]
+            if i == 0:
+                sequence += [upconv, upnorm]
+            else:
+                sequence += [uprelu, upconv, upnorm]
         for _ in range(times_nc_changes):
             outer_nc = inner_nc // 2
             uprelu = nn.ReLU(True)
