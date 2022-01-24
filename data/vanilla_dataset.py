@@ -62,7 +62,7 @@ class VanillaDataset(BaseDataset):
         """Return a data point and its metadata information.
 
         Parameters:
-            index -- a random integer for data indexing
+            index -- a random integer for data indexing。
 
         Returns:
             a dictionary of data with their names. It usually contains the data itself and its metadata information.
