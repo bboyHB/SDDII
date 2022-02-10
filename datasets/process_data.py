@@ -4,6 +4,8 @@ import json
 import os
 import glob
 import cv2
+import shutil
+import numpy as np
 
 from labelme.logger import logger
 from labelme import utils
@@ -58,7 +60,7 @@ def extract_mask_from_label():
 
         logger.info("Saved label info to: {}".format(out_dir))
 
-def extract_class4_for_generate_defect_gan():
+def extract_defects_for_generate_defect_gan():
     root = os.path.join(labeled_DAGM_path, 'Class4_relabel')
     content = ('Train', 'Test')
     for t in content:
@@ -98,9 +100,31 @@ def extract_class4_for_generate_defect_gan():
 
         logger.info("Saved label info to: {}".format(out_dir))
 
+
+def save_defective_samples():
+    root = os.path.join(labeled_DAGM_path, 'Class4')
+    content = ('Train', 'Test')
+    new_path = 'DAGM_Class4_no_defect'
+    for c in content:
+        new_sub_dir = os.path.join(new_path, c.lower())
+        if not os.path.exists(new_sub_dir):
+            os.makedirs(new_sub_dir)
+        defectives = [x[:4]+x[-4:] for x in os.listdir(os.path.join(root, c, 'Label')) if x.endswith('PNG')]
+        names = [x for x in os.listdir(os.path.join(root, c)) if x.endswith('PNG')]
+        non_defectives = [x for x in names if x not in defectives]
+        for name in non_defectives:
+            shutil.copyfile(os.path.join(root, c, name), os.path.join(new_sub_dir, name))
+
+def extract_biggest_connected_component(img):
+    _, labels, stats, _ = cv2.connectedComponentsWithStats(img)
+    index = np.argmax(stats[1:, 4]) + 1
+    filted_img = img * (labels == index)
+    return filted_img
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-path", default='E:\DAGM')
     args = parser.parse_args()
     labeled_DAGM_path = args.path
-    extract_class4_for_generate_defect_gan()
+    extract_defects_for_generate_defect_gan()
+    save_defective_samples()
