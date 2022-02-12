@@ -74,7 +74,7 @@ class GenerateDefectModel(BaseModel):
             self.optimizer_D = torch.optim.RMSprop(self.netD.parameters(), lr=opt.lr)
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
-
+            self.train_iter_num = 0
         # Our program will automatically call <model.setup> to define schedulers, load networks, and print networks
 
     def set_input(self, input):
@@ -113,11 +113,13 @@ class GenerateDefectModel(BaseModel):
 
     def optimize_parameters(self):
         self.forward()  # compute fake images: G(A)
+        self.train_iter_num += 1
         # update D
-        self.set_requires_grad(self.netD, True)  # enable backprop for D
-        self.optimizer_D.zero_grad()  # set D's gradients to zero
-        self.backward_D()  # calculate gradients for D
-        self.optimizer_D.step()  # update D's weights
+        if self.train_iter_num % 2 == 0:
+            self.set_requires_grad(self.netD, True)  # enable backprop for D
+            self.optimizer_D.zero_grad()  # set D's gradients to zero
+            self.backward_D()  # calculate gradients for D
+            self.optimizer_D.step()  # update D's weights
         # update G
         self.set_requires_grad(self.netD, False)  # D requires no gradients when optimizing G
         self.optimizer_G.zero_grad()  # set G's gradients to zero
