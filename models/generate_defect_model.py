@@ -70,8 +70,8 @@ class GenerateDefectModel(BaseModel):
             self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)
             # define and initialize optimizers. You can define one optimizer for each network.
             # If two networks are updated at the same time, you can use itertools.chain to group them. See cycle_gan_model.py for an example.
-            self.optimizer_G = torch.optim.RMSprop(self.netG.parameters(), lr=opt.lr)
-            self.optimizer_D = torch.optim.RMSprop(self.netD.parameters(), lr=opt.lr)
+            self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
+            self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
             self.train_iter_num = 0
