@@ -18,7 +18,7 @@ opt = TrainOptions().parse()
 opt.no_flip = True
 transform = get_transform(opt)
 
-mix_generate = True
+# mix_generate = True
 G = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
                                         not opt.no_dropout, opt.init_type, opt.init_gain, [0])
 G_dict = torch.load(opt.modelpath)  # '../checkpoints/RSDDs2_cycle/latest_net_G_A.pth'
@@ -48,11 +48,11 @@ with torch.no_grad():
         A_root = os.path.join(data_dir, t+'A')
         A_names = os.listdir(A_root)
         for i in range(num2generate):
-            if mix_generate and i % 100 == 0:
-                temp_p = './checkpoints/RSDDs1_cycle/' + str((i * 5) % 200 + 5) + '_net_G_A.pth'
-                G_dict = torch.load(temp_p)  # '../checkpoints/RSDDs2_cycle/latest_net_G_A.pth'
-                G_dict = {'module.' + k: v for k, v in dict(G_dict).items()}
-                G.load_state_dict(G_dict)
+            # if mix_generate and i % 100 == 0:
+            #     temp_p = './checkpoints/RSDDs1_cycle/' + str((i * 5) % 200 + 5) + '_net_G_A.pth'
+            #     G_dict = torch.load(temp_p)  # '../checkpoints/RSDDs2_cycle/latest_net_G_A.pth'
+            #     G_dict = {'module.' + k: v for k, v in dict(G_dict).items()}
+            #     G.load_state_dict(G_dict)
             name = random.choice(A_names)
             A_path = os.path.join(A_root, name)
             A_img = Image.open(A_path).convert('RGB')

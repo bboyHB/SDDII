@@ -52,3 +52,46 @@ if __name__ == '__main__':
             cv2.imshow('1', defect)
             cv2.waitKey(0)
             pass
+
+
+'''
+import os
+import sys
+import random
+import torch
+import argparse
+from PIL import Image
+from torchvision.transforms import functional as F
+
+from matplotlib import pyplot as plt
+from models import networks
+from data.base_dataset import get_transform
+from options.train_options import TrainOptions
+
+
+
+opt = TrainOptions().parse()
+opt.no_flip = True
+transform = get_transform(opt)
+
+opt.model = 'generate_defect'
+opt.netG = 'vanilla'
+opt.dataset_mode = 'vanilla'
+opt.input_nc = 1
+opt.output_nc = 1
+
+G = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
+                                        not opt.no_dropout, opt.init_type, opt.init_gain, [0])
+path = '../checkpoints/DAGM_Class4_filted/latest_net_G.pth'
+G_dict = torch.load(path)  # '../checkpoints/RSDDs2_cycle/latest_net_G_A.pth'
+G_dict = {'module.'+k: v for k, v in dict(G_dict).items()}
+G.load_state_dict(G_dict)
+
+with torch.no_grad():
+    for _ in range(10):
+        output = G(torch.randn((1, 512, 1, 1)))
+        B_img = F.to_pil_image((output / 2 + 0.5).cpu().squeeze())
+        plt.imshow(B_img)
+        plt.show()
+
+'''
