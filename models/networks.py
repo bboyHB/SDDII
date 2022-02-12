@@ -554,7 +554,7 @@ class VanillaGenerator(nn.Module):
                                         kernel_size=4, stride=2,
                                         padding=1, bias=use_bias)
             upnorm = norm_layer(outer_nc)
-            sequence += [uprelu, upconv, upnorm]
+            sequence += [upconv, upnorm, uprelu]
         for _ in range(times_nc_changes):
             outer_nc = inner_nc // 2
             uprelu = nn.ReLU(True)
@@ -562,13 +562,13 @@ class VanillaGenerator(nn.Module):
                                         kernel_size=4, stride=2,
                                         padding=1, bias=use_bias)
             upnorm = norm_layer(outer_nc)
-            sequence += [uprelu, upconv, upnorm]
+            sequence += [upconv, upnorm, uprelu]
             inner_nc = outer_nc
         uprelu = nn.ReLU(True)
         upconv = nn.ConvTranspose2d(inner_nc, image_nc,
                                     kernel_size=4, stride=2,
                                     padding=1, bias=use_bias)
-        sequence += [uprelu, upconv, nn.Tanh()]
+        sequence += [upconv, nn.Tanh()]
         self.model = nn.Sequential(*sequence)
 
     def forward(self, z):
