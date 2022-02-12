@@ -115,7 +115,7 @@ class GenerateDefectModel(BaseModel):
         self.forward()  # compute fake images: G(A)
         self.train_iter_num += 1
         # update D
-        if self.train_iter_num % 3 == 0:
+        if self.train_iter_num % 5 == 0:
             self.set_requires_grad(self.netD, True)  # enable backprop for D
             self.optimizer_D.zero_grad()  # set D's gradients to zero
             self.backward_D()  # calculate gradients for D
