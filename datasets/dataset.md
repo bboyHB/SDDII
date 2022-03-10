@@ -14,6 +14,7 @@ python train.py --dataroot ./datasets/DAGM_Class4_filted/ --model generate_defec
 python ./datasets/A_generate_B.py --datadir ./datasets/RSDDs1_cycle --modelpath ./checkpoints/RSDDs1_cycle/195_net_G_A.pth --load_size 256 --crop_size 256
 python ./datasets/A_generate_B.py --datadir ./datasets/RSDDs2_cycle --modelpath ./checkpoints/RSDDs2_cycle/135_net_G_A.pth --load_size 256 --crop_size 256
 python ./datasets/A_generate_B.py --datadir ./datasets/KSDD_cycle --modelpath ./checkpoints/KSDD_cycle/135_net_G_A.pth --load_size 512 --crop_size 512
+python ./datasets/A_generate_B.py --datadir ./datasets/DAGM_Class1_cycle --modelpath ./checkpoints/DAGM_Class1_cycle/latest_net_G_A.pth --load_size 512 --crop_size 512
 
 然后运行
 python ./datasets/combine_A_and_B.py --fold_A ./datasets/RSDDs1_cycle_A_and_B/A --fold_B ./datasets/RSDDs1_cycle_A_and_B/B --fold_AB ./datasets/RSDDs1_pix2pix_AB

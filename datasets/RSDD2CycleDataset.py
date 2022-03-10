@@ -102,12 +102,12 @@ def split_supervised_seg_data(output_path, orin_path):
                 if (height - h2cut) % stride != 0:
                     img_cut = img[height - h2cut:, :, :]
                     mask_cut = mask[height - h2cut:, :, :]
-                    cv2.imwrite(os.path.join(out_t_img, name[:-4] + '_' + str(j) + '.jpg'), img_cut)
-                    cv2.imwrite(os.path.join(out_t_mask, name[:-4] + '_' + str(j) + '.jpg'), mask_cut)
+                    cv2.imwrite(os.path.join(out_t_img, name[:-4] + '_' + str(j+1) + '.jpg'), img_cut)
+                    cv2.imwrite(os.path.join(out_t_mask, name[:-4] + '_' + str(j+1) + '.jpg'), mask_cut)
 
 
 if __name__ == '__main__':
-    # split_cut_RSDD('C:/Users/DeepLearning/Desktop/RSDDs/Type-I RSDDs dataset', 'RSDDs1', 160, 80)
-    # split_cut_RSDD('C:/Users/DeepLearning/Desktop/RSDDs/Type-II RSDDs dataset', 'RSDDs2', 55, 27)
+    # split_cut_RSDD('C:/Users/bboyHB/Desktop/RSDDs/Type-I RSDDs dataset', 'RSDDs1', 160, 80)
+    # split_cut_RSDD('C:/Users/bboyHB/Desktop/RSDDs/Type-II RSDDs dataset', 'RSDDs2', 55, 27)
     split_supervised_seg_data('RSDDs1_seg', 'RSDDs1_origin')
     split_supervised_seg_data('RSDDs2_seg', 'RSDDs2_origin')
