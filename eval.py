@@ -380,7 +380,7 @@ def eval_fid_when_train_cyclegan(opt, R_cyc):
     transform = get_transform(opt, grayscale=opt.input_nc == 1)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    num_to_generate = 2048
+    num_to_generate = 128
     real_A_path = os.path.join(opt.dataroot, "trainA")
     real_B_train_path = os.path.join(opt.dataroot, "trainB")
     real_B_test_path = os.path.join(opt.dataroot, "testB")

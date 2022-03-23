@@ -6,7 +6,8 @@ RSDD2CycleDataset.py
 python train.py --dataroot ./datasets/RSDDs1_cycle --model cycle_gan --name RSDDs1_cycle --load_size 256 --crop_size 256
 python train.py --dataroot ./datasets/RSDDs2_cycle --model cycle_gan --name RSDDs2_cycle --load_size 256 --crop_size 256
 python train.py --dataroot ./datasets/KSDD_cycle --model cycle_gan --name KSDD_cycle --load_size 512 --crop_size 512
-python train.py --dataroot ./datasets/DAGM_Class1_cycle/ --model cycle_gan --name DAGM_Class1_cycle --load_size 512 --crop_size 512 --n_epochs 25 --n_epochs_decay 25 --input_nc 1 --output_nc 1 --four_rotate --netG unet_256 --iffid --batch_size 4
+python train.py --dataroot ./datasets/DAGM_Class1_cycle/ --model cycle_gan --name DAGM_Class1_cycle --load_size 512 --crop_size 512 --n_epochs 25 --n_epochs_decay 25 --input_nc 1 --output_nc 1 --four_rotate --netG unet_256 --iffid --batch_size 4 --display_port 8097 --gpu_ids 0,1
+python train.py --dataroot ./datasets/DAGM_Class6_cycle/ --model cycle_gan --name DAGM_Class6_cycle --load_size 512 --crop_size 512 --n_epochs 25 --n_epochs_decay 25 --input_nc 1 --output_nc 1 --four_rotate --netG unet_256 --iffid --batch_size 4 --display_port 6006 --gpu_ids 0,1
 python train.py --dataroot ./datasets/DAGM_Class4_filted/ --model generate_defect --name DAGM_Class4_filted --load_size 512 --crop_size 512 --n_epochs 25 --n_epochs_decay 25 --input_nc 1 --output_nc 1 --four_rotate
 
 
