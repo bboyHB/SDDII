@@ -5,7 +5,7 @@ DAGM_path = 'DAGM'
 classes = os.listdir(DAGM_path)
 
 for cls in classes:
-    output_path = os.path.join(f'DAGM_{cls}_cycle', cls)
+    output_path = os.path.join(f'DAGM_{cls}_cycle')
     trainA_path = os.path.join(output_path, 'trainA')
     trainB_path = os.path.join(output_path, 'trainB')
     testA_path = os.path.join(output_path, 'testA')
