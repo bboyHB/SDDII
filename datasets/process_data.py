@@ -193,7 +193,7 @@ def cal_fids(path1, path2):
     device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
     num_avail_cpus = len(os.sched_getaffinity(0)) # os.cpu_count()
     num_workers = min(num_avail_cpus, 8)
-    batch_size = 50
+    batch_size = 4
     output = {}
     paths = (path1, path2)
     for dims in (64, 192, 768, 2048):
