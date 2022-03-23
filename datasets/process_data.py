@@ -191,12 +191,12 @@ def cal_fids(path1, path2):
     import pytorch_fid.fid_score as fid
     import torch
     device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
-    num_avail_cpus = len(os.sched_getaffinity(0)) # os.cpu_count()
+    num_avail_cpus = len(os.sched_getaffinity(0))  # os.cpu_count()
     num_workers = min(num_avail_cpus, 8)
     batch_size = 4
     output = {}
     paths = (path1, path2)
-    for dims in (64, 192, 768, 2048):
+    for dims in (64, 192):  # , 768, 2048
         fid_value = fid.calculate_fid_given_paths(paths,
                                                   batch_size,
                                                   device,
