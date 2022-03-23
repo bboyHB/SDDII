@@ -39,6 +39,7 @@ class TrainOptions(BaseOptions):
         # custom
         parser.add_argument('--datadir', help='path of A')
         parser.add_argument('--modelpath', help='path to trained model')
-        parser.add_argument('--ifeval', help='path to trained model')
+        parser.add_argument('--ifeval', action='store_true', help='train p2p')
+        parser.add_argument('--iffid', action='store_true', help='draw fid fig')
         self.isTrain = True
         return parser

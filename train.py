@@ -18,13 +18,13 @@ See options/base_options.py and options/train_options.py for more training optio
 See training and test tips at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/tips.md
 See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/qa.md
 """
+import os
 import time
 from options.train_options import TrainOptions
 from data import create_dataset
 from models import create_model
 from util.visualizer import Visualizer
-
-from eval import eval_when_train_p2p
+from eval import eval_when_train_p2p, eval_fid_when_train_cyclegan
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
@@ -36,7 +36,6 @@ if __name__ == '__main__':
     model.setup(opt)               # regular setup: load and print networks; create schedulers
     visualizer = Visualizer(opt)   # create a visualizer that display/save images and plots
     total_iters = 0                # the total number of training iterations
-
 
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
         epoch_start_time = time.time()  # timer for entire epoch
@@ -82,5 +81,14 @@ if __name__ == '__main__':
             IOU, F1 = eval_when_train_p2p(opt, model.netG)
             visualizer.plot_eval_results(epoch, {'eval_IOU': IOU, 'eval_F1': F1})
             # model.netG.train()
+        if opt.iffid:
+            print(epoch)
+            model.netG_A.eval()
+            fids = eval_fid_when_train_cyclegan(opt, model.netG_A)
+            visualizer.plot_fid_results(epoch, fids)
+            mode = 'w' if epoch == 0 else 'a'
+            with open(os.path.join(opt.checkpoints_dir, opt.name, 'fids.txt'), mode) as fid_writer:
+                fid_writer.write(f"{epoch},{','.join(fids.values())}")
+            model.netG_A.train()
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))

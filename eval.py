@@ -2,6 +2,7 @@ import os
 import cv2
 import time
 import torch
+import random
 import numpy as np
 from PIL import Image
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score, recall_score
@@ -11,6 +12,7 @@ from models import networks
 from data.base_dataset import get_transform
 from options.train_options import TrainOptions
 from torchvision.transforms import functional as F
+from datasets.process_data import cal_fids
 
 
 def cut_image(img_pil, height, stride):
@@ -370,6 +372,40 @@ def eval_when_train_p2p(opt, R_p2p):
     opt.no_flip = temp_no_flip
     return IOU, F1
 
+def eval_fid_when_train_cyclegan(opt, R_cyc):
+    temp_no_flip = opt.no_flip
+    temp_four_rotate = opt.four_rotate
+    opt.no_flip = True
+    opt.four_rotate = False
+    transform = get_transform(opt)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    num_to_generate = 2048
+    real_A_path = os.path.join(opt.dataroot, "trainA")
+    real_B_path = os.path.join(opt.dataroot, "trainB")
+    fake_B_path = os.path.join(opt.checkpoints_dir, opt.name, "B")
+    if not os.path.exists(fake_B_path):
+        os.makedirs(fake_B_path)
+
+    with torch.no_grad():
+        real_As = os.listdir(real_A_path)
+        for i in range(num_to_generate):
+            name = random.choice(real_As)
+            A_path = os.path.join(real_A_path, name)
+            if opt.input_nc == 1:
+                A_img = Image.open(A_path).convert('L')
+            else:
+                A_img = Image.open(A_path).convert('RGB')
+
+            A_img_tensor = transform(A_img).unsqueeze(0).to(device)
+            fake_B_tensor = R_cyc(A_img_tensor)
+            fake_B = F.to_pil_image((fake_B_tensor / 2 + 0.5).cpu().squeeze())
+            fake_B.save(os.path.join(fake_B_path, f'fake_B_{i}.png'))
+        fids = cal_fids(fake_B_path, real_A_path)
+        print('FID:', fids)
+    opt.no_flip = temp_no_flip
+    opt.four_rotate = temp_four_rotate
+    return fids
 
 if __name__ == '__main__':
     eval_compare()

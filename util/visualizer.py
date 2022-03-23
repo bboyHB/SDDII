@@ -227,6 +227,23 @@ class Visualizer():
         except VisdomExceptionBase:
             self.create_visdom_connections()
 
+    def plot_fid_results(self, epoch, results, counter_ratio=0):
+        if not hasattr(self, 'plot_data_eval'):
+            self.plot_data_eval = {'X': [], 'Y': [], 'legend': list(results.keys())}
+        self.plot_data_eval['X'].append(epoch + counter_ratio)
+        self.plot_data_eval['Y'].append([results[k] for k in self.plot_data_eval['legend']])
+        try:
+            self.vis.line(
+                X=np.stack([np.array(self.plot_data_eval['X'])] * len(self.plot_data_eval['legend']), 1),
+                Y=np.array(self.plot_data_eval['Y']),
+                opts={
+                    'title': self.name + ' eval fid results over time',
+                    'legend': self.plot_data_eval['legend'],
+                    'xlabel': 'epoch',
+                    'ylabel': 'fid'},
+                win=self.display_id + 4)
+        except VisdomExceptionBase:
+            self.create_visdom_connections()
 
     # losses: same format as |losses| of plot_current_losses
     def print_current_losses(self, epoch, iters, losses, t_comp, t_data):
