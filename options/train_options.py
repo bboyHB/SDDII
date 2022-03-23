@@ -38,7 +38,7 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--lr_decay_iters', type=int, default=50, help='multiply by a gamma every lr_decay_iters iterations')
         # custom
         parser.add_argument('--datadir', help='path of A')
-        parser.add_argument('--modelpath', help='path to trained model')
+        parser.add_argument('--modelpath', help='path to trained model G_A')
         parser.add_argument('--ifeval', action='store_true', help='train p2p')
         parser.add_argument('--iffid', action='store_true', help='draw fid fig')
         self.isTrain = True

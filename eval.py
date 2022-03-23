@@ -377,7 +377,7 @@ def eval_fid_when_train_cyclegan(opt, R_cyc):
     temp_four_rotate = opt.four_rotate
     opt.no_flip = True
     opt.four_rotate = False
-    transform = get_transform(opt)
+    transform = get_transform(opt, grayscale=opt.input_nc == 1)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     num_to_generate = 2048
