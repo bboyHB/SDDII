@@ -382,7 +382,8 @@ def eval_fid_when_train_cyclegan(opt, R_cyc):
 
     num_to_generate = 2048
     real_A_path = os.path.join(opt.dataroot, "trainA")
-    real_B_path = os.path.join(opt.dataroot, "trainB")
+    real_B_train_path = os.path.join(opt.dataroot, "trainB")
+    real_B_test_path = os.path.join(opt.dataroot, "testB")
     fake_B_path = os.path.join(opt.checkpoints_dir, opt.name, "B")
     if not os.path.exists(fake_B_path):
         os.makedirs(fake_B_path)
@@ -401,11 +402,13 @@ def eval_fid_when_train_cyclegan(opt, R_cyc):
             fake_B_tensor = R_cyc(A_img_tensor)
             fake_B = F.to_pil_image((fake_B_tensor / 2 + 0.5).cpu().squeeze())
             fake_B.save(os.path.join(fake_B_path, f'fake_B_{i}.png'))
-        fids = cal_fids(fake_B_path, real_A_path)
-        print('FID:', fids)
+        fids_1 = cal_fids(fake_B_path, real_B_test_path)
+        # fids_2 = cal_fids(fake_B_path, real_B_train_path)
+        print('FID:', fids_1)
+        # print('FID:', fids_2)
     opt.no_flip = temp_no_flip
     opt.four_rotate = temp_four_rotate
-    return fids
+    return fids_1  # , fids_2
 
 if __name__ == '__main__':
     eval_compare()
