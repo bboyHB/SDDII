@@ -24,5 +24,5 @@ for cls in classes:
         for normal in normal_names:
             shutil.copy(os.path.join(DAGM_path, cls, dir, normal), os.path.join(destA, normal.replace('PNG', 'png')))
         for defect in defect_names:
-            shutil.copy(os.path.join(DAGM_path, cls, dir, defect), os.path.join(destB, defect))
+            shutil.copy(os.path.join(DAGM_path, cls, dir, defect), os.path.join(destB, defect.replace('PNG', 'png')))
 
