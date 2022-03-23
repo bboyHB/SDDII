@@ -47,6 +47,7 @@ datasets/CMP
 datasets/CMP_AB
 datasets/cycle
 datasets/DAGM
+datasets/DAGM_*
 datasets/KSDD_cycle
 datasets/KSDD_origin
 datasets/KSDD_seg
