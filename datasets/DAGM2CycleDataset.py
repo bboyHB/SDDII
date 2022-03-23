@@ -1,7 +1,7 @@
 import os
 import shutil
 
-DAGM_path = 'C:/Users/DeepLearning/Desktop/DAGM'
+DAGM_path = 'DAGM'
 classes = os.listdir(DAGM_path)
 
 for cls in classes:
@@ -22,7 +22,7 @@ for cls in classes:
         destA = eval(dir.lower() + 'A_path')
         destB = eval(dir.lower() + 'B_path')
         for normal in normal_names:
-            shutil.copy(os.path.join(DAGM_path, cls, dir, normal), os.path.join(destA, normal))
+            shutil.copy(os.path.join(DAGM_path, cls, dir, normal), os.path.join(destA, normal.replace('PNG', 'png')))
         for defect in defect_names:
             shutil.copy(os.path.join(DAGM_path, cls, dir, defect), os.path.join(destB, defect))
 
