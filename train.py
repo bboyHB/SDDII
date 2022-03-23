@@ -88,7 +88,7 @@ if __name__ == '__main__':
             visualizer.plot_fid_results(epoch, fids)
             mode = 'w' if epoch == 0 else 'a'
             with open(os.path.join(opt.checkpoints_dir, opt.name, 'fids.txt'), mode) as fid_writer:
-                fid_writer.write(f"{epoch},{','.join(fids.values())}")
+                fid_writer.write(f"{epoch},{','.join([str(x) for x in fids.values()])}")
             model.netG_A.train()
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
