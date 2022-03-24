@@ -354,7 +354,14 @@ def eval_when_train_p2p(opt, R_p2p):
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             elif opt.name[:4] == 'DAGM':
-
+                A_img_tensor = transform(A_img).unsqueeze(0).to(device)
+                A_img_repair = R_p2p(A_img_tensor)
+                diff = torch.sum(torch.clamp(A_img_repair - A_img_tensor, min=0), dim=1) / 6.0
+                diff[diff >= thresh_hold] = 1
+                diff[diff < thresh_hold] = 0
+                final_seg_p2p = diff.cpu().numpy()
+                ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
+                f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             else:
                 break
             # time_p2p.append(time.time() - now)
