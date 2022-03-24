@@ -21,11 +21,13 @@ python ./datasets/A_generate_B.py --datadir ./datasets/DAGM_Class1_cycle --model
 python ./datasets/combine_A_and_B.py --fold_A ./datasets/RSDDs1_cycle_A_and_B/A --fold_B ./datasets/RSDDs1_cycle_A_and_B/B --fold_AB ./datasets/RSDDs1_pix2pix_AB
 python ./datasets/combine_A_and_B.py --fold_A ./datasets/RSDDs2_cycle_A_and_B/A --fold_B ./datasets/RSDDs2_cycle_A_and_B/B --fold_AB ./datasets/RSDDs2_pix2pix_AB
 python ./datasets/combine_A_and_B.py --fold_A ./datasets/KSDD_cycle_A_and_B/A --fold_B ./datasets/KSDD_cycle_A_and_B/B --fold_AB ./datasets/KSDD_pix2pix_AB
+python ./datasets/combine_A_and_B.py --fold_A ./datasets/DAGM_Class1_cycle_A_and_B/A --fold_B ./datasets/DAGM_Class1_cycle_A_and_B/B --fold_AB ./datasets/DAGM_Class1_pix2pix_AB
 
 训练pix2pix
-python train.py --dataroot ./datasets/RSDDs1_pix2pix_AB --model pix2pix --name RSDDs1_pix2pix --direction BtoA --load_size 256 --crop_size 256 --ifeval 1 --print_freq 5000
+python train.py --dataroot ./datasets/RSDDs1_pix2pix_AB --model pix2pix --name RSDDs1_pix2pix --direction BtoA --load_size 256 --crop_size 256 --ifeval --print_freq 5000
 python train.py --dataroot ./datasets/RSDDs2_pix2pix_AB --model pix2pix --name RSDDs2_pix2pix --direction BtoA --load_size 256 --crop_size 256
 python train.py --dataroot ./datasets/KSDD_pix2pix_AB --model pix2pix --name KSDD_pix2pix --direction BtoA --load_size 512 --crop_size 512
+python train.py --dataroot ./datasets/DAGM_Class1_pix2pix_AB --model pix2pix --name DAGM_Class1_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --display_port 8097
 
 训练unet
 train_unet.py
