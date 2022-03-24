@@ -39,20 +39,23 @@ with torch.no_grad():
         if t == 'train':
             out_A = train_A
             out_B = train_B
-            num2generate = 1024
+            # num2generate = 1024
         else:
             out_A = test_A
             out_B = test_B
-            num2generate = 512
+            # num2generate = 512
         A_root = os.path.join(data_dir, t+'A')
         A_names = os.listdir(A_root)
+        num2generate = len(A_names)
         for i in range(num2generate):
             # if mix_generate and i % 100 == 0:
             #     temp_p = './checkpoints/RSDDs1_cycle/' + str((i * 5) % 200 + 5) + '_net_G_A.pth'
             #     G_dict = torch.load(temp_p)  # '../checkpoints/RSDDs2_cycle/latest_net_G_A.pth'
             #     G_dict = {'module.' + k: v for k, v in dict(G_dict).items()}
             #     G.load_state_dict(G_dict)
-            name = random.choice(A_names)
+
+            # name = random.choice(A_names)
+            name = A_names[i]
             A_path = os.path.join(A_root, name)
             A_img = Image.open(A_path).convert('RGB')
             A_img_tensor = transform(A_img).unsqueeze(0)
