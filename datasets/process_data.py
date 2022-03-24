@@ -93,7 +93,7 @@ def extract_mask_from_label_and_output_seg_dir(i, same_dir=True):
             if not imageData:
                 # if json files are at the same dir with PNGs, same_dir=True
                 if same_dir:
-                    imagePath = json_file.replace("json", "png")
+                    imagePath = json_file.replace("json", "PNG")
                 else:
                     imagePath = os.path.join(os.path.dirname(json_file), data["imagePath"])
                 with open(imagePath, "rb") as f:

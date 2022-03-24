@@ -310,14 +310,13 @@ def eval_when_train_p2p(opt, R_p2p):
     opt.no_flip = True
     transform = get_transform(opt)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # R_p2p = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'unet_256', 'batch',
-    #                           not opt.no_dropout, opt.init_type, opt.init_gain, [0])
-    # R_p2p_dict = torch.load('checkpoints/RSDDs1_pix2pix/latest_net_G.pth')
-    # R_p2p_dict = {'module.' + k: v for k, v in dict(R_p2p_dict).items()}
-    # R_p2p.load_state_dict(R_p2p_dict)
-    # R_p2p.to(device)
 
-    eval_path = './datasets/RSDDs1_origin/test'
+    if opt.name[:4] == 'RSDD':
+        eval_path = './datasets/RSDDs1_origin/test'
+    elif opt.name[:4] == 'DAGM':
+        eval_path = opt.name[:11] + '_seg/Test'
+    else:
+        eval_path = 'not_exist'
     img_path = os.path.join(eval_path, 'img')
     mask_path = os.path.join(eval_path, 'mask')
 
@@ -332,32 +331,37 @@ def eval_when_train_p2p(opt, R_p2p):
             A_path = os.path.join(img_path, name)
             A_img = Image.open(A_path).convert('RGB')
             A_mask = cv2.imread(os.path.join(mask_path, name), cv2.IMREAD_GRAYSCALE)
-            if np.max(A_mask) > 0:
-                real.append(1)
-            else:
-                real.append(0)
+            # if np.max(A_mask) > 0:
+            #     real.append(1)
+            # else:
+            #     real.append(0)
 
             segs_p2p = []
             now = time.time()
-            for chip in cut_image(A_img, A_img.width, A_img.width // 2):
-                chip_tensor = transform(chip).unsqueeze(0).to(device)
-                chip_repair = R_p2p(chip_tensor)
-                # diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
-                diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
-                diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
-                # hist, _ = np.histogram(diff.squeeze().cpu().numpy())
-                diff[diff >= thresh_hold] = 1
-                diff[diff < thresh_hold] = 0
-                segs_p2p.append(diff.squeeze().cpu().numpy())
-            final_seg_p2p = gether_seg(segs_p2p, A_img.size, A_img.width, A_img.width // 2)
-            final_seg_p2p = filt_small_pixel_block(final_seg_p2p)
-            ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
-            f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
-            time_p2p.append(time.time() - now)
-            if np.max(final_seg_p2p) > 0:
-                pred_p2p.append(1)
+            if opt.name[:4] == 'RSDD':
+                for chip in cut_image(A_img, A_img.width, A_img.width // 2):
+                    chip_tensor = transform(chip).unsqueeze(0).to(device)
+                    chip_repair = R_p2p(chip_tensor)
+                    # diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
+                    diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
+                    diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
+                    # hist, _ = np.histogram(diff.squeeze().cpu().numpy())
+                    diff[diff >= thresh_hold] = 1
+                    diff[diff < thresh_hold] = 0
+                    segs_p2p.append(diff.squeeze().cpu().numpy())
+                final_seg_p2p = gether_seg(segs_p2p, A_img.size, A_img.width, A_img.width // 2)
+                final_seg_p2p = filt_small_pixel_block(final_seg_p2p)
+                ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
+                f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
+            elif opt.name[:4] == 'DAGM':
+
             else:
-                pred_p2p.append(0)
+                break
+            # time_p2p.append(time.time() - now)
+            # if np.max(final_seg_p2p) > 0:
+            #     pred_p2p.append(1)
+            # else:
+            #     pred_p2p.append(0)
 
         IOU = sum(ious_p2p) / len(ious_p2p)
         F1 = sum(f1_p2p) / len(f1_p2p)
