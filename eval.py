@@ -320,7 +320,6 @@ def eval_when_train_p2p(opt, R_p2p):
     img_path = os.path.join(eval_path, 'img')
     mask_path = os.path.join(eval_path, 'mask')
 
-    thresh_hold = 0.15
     real = []
     pred_p2p = []
     ious_p2p = []
@@ -339,6 +338,7 @@ def eval_when_train_p2p(opt, R_p2p):
             segs_p2p = []
             now = time.time()
             if opt.name[:4] == 'RSDD':
+                thresh_hold = 0.15
                 for chip in cut_image(A_img, A_img.width, A_img.width // 2):
                     chip_tensor = transform(chip).unsqueeze(0).to(device)
                     chip_repair = R_p2p(chip_tensor)
@@ -354,6 +354,7 @@ def eval_when_train_p2p(opt, R_p2p):
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             elif opt.name[:4] == 'DAGM':
+                thresh_hold = 0.04
                 A_img_tensor = transform(A_img).unsqueeze(0).to(device)
                 A_img_repair = R_p2p(A_img_tensor)
                 diff = torch.sum(torch.clamp(A_img_repair - A_img_tensor, min=0), dim=1) / 6.0
