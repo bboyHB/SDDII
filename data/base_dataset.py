@@ -163,7 +163,7 @@ def __add_noise(img, grayscale):
     img_ = np.array(img).copy()
     img_ = img_ / 255.0
     # 产生高斯 noise
-    noise = np.random.normal(size=img_.shape)
+    noise = np.random.normal(scale=0.03, size=img_.shape)
     # 将噪声和图片叠加
     gaussian_out = img_ + noise
     # 将超过 1 的置 1，低于 0 的置 0
