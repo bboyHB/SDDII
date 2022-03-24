@@ -308,7 +308,7 @@ def eval_compare():
 def eval_when_train_p2p(opt, R_p2p):
     temp_no_flip = opt.no_flip
     opt.no_flip = True
-    transform = get_transform(opt)
+    transform = get_transform(opt, grayscale=opt.input_nc == 1)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if opt.name[:4] == 'RSDD':
