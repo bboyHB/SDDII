@@ -314,7 +314,7 @@ def eval_when_train_p2p(opt, R_p2p):
     if opt.name[:4] == 'RSDD':
         eval_path = './datasets/RSDDs1_origin/test'
     elif opt.name[:4] == 'DAGM':
-        eval_path = opt.name[:11] + '_seg/Test'
+        eval_path = './datasets/' + opt.name[:11] + '_seg/Test'
     else:
         eval_path = 'not_exist'
     img_path = os.path.join(eval_path, 'img')
