@@ -86,7 +86,7 @@ if __name__ == '__main__':
             model.netG_A.eval()
             fids = eval_fid_when_train_cyclegan(opt, model.netG_A)
             visualizer.plot_fid_results(epoch, fids)
-            mode = 'w' if epoch == 0 else 'a'
+            mode = 'w' if epoch == 1 else 'a'
             with open(os.path.join(opt.checkpoints_dir, opt.name, 'fids.txt'), mode) as fid_writer:
                 fid_writer.write(f"{epoch},{','.join([str(x) for x in fids.values()])}\n")
             model.netG_A.train()

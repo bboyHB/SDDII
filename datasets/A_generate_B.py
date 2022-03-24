@@ -13,7 +13,6 @@ from data.base_dataset import get_transform
 from options.train_options import TrainOptions
 
 
-
 opt = TrainOptions().parse()
 opt.no_flip = True
 transform = get_transform(opt)
@@ -40,11 +39,11 @@ with torch.no_grad():
         if t == 'train':
             out_A = train_A
             out_B = train_B
-            num2generate = 5000
+            num2generate = 1024
         else:
             out_A = test_A
             out_B = test_B
-            num2generate = 500
+            num2generate = 512
         A_root = os.path.join(data_dir, t+'A')
         A_names = os.listdir(A_root)
         for i in range(num2generate):

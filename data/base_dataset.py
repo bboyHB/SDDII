@@ -106,6 +106,9 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
     if opt.four_rotate:
         transform_list.append(transforms.Lambda(lambda img: __rotate(img)))
 
+    if opt.noise:
+        transform_list.append(transforms.Lambda(lambda img: __add_noise(img, grayscale)))
+
     if convert:
         transform_list += [transforms.ToTensor()]
         if grayscale:
@@ -154,6 +157,24 @@ def __rotate(img):
     degrees = (0, 90, 180, 270)
     r = random.randint(0, 3)
     return img.rotate(degrees[r])
+
+def __add_noise(img, grayscale):
+    # 将图片灰度标准化
+    img_ = np.array(img).copy()
+    img_ = img_ / 255.0
+    # 产生高斯 noise
+    noise = np.random.normal(size=img_.shape)
+    # 将噪声和图片叠加
+    gaussian_out = img_ + noise
+    # 将超过 1 的置 1，低于 0 的置 0
+    gaussian_out = np.clip(gaussian_out, 0, 1)
+    # 将图片灰度范围的恢复为 0-255
+    gaussian_out = np.uint8(gaussian_out * 255)
+    # 将噪声范围搞为 0-255
+    # noise = np.uint8(noise*255)
+    if grayscale:
+        return Image.fromarray(gaussian_out).convert('L')
+    return Image.fromarray(gaussian_out).convert('RGB')
 
 def __print_size_warning(ow, oh, w, h):
     """Print warning information about image size(only print once)"""
