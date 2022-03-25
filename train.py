@@ -79,6 +79,9 @@ if __name__ == '__main__':
             print(epoch)
             # model.netG.eval()
             IOU, F1 = eval_when_train_p2p(opt, model.netG)
+            mode = 'w' if epoch == 1 else 'a'
+            with open(os.path.join(opt.checkpoints_dir, opt.name, 'iouf1s.txt'), mode) as writer:
+                writer.write(f"{epoch},{IOU},{F1}\n")
             visualizer.plot_eval_results(epoch, {'eval_IOU': IOU, 'eval_F1': F1})
             # model.netG.train()
         if opt.iffid:
