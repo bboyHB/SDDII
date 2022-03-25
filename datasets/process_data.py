@@ -224,7 +224,8 @@ def extract_diff(img1, img2, thresh_hold, first_kernel=(3, 3), only_max=True):
 
     uint8_lbp_diff_close_open = np.array(lbp_diff_close_open, dtype=np.uint8)
     ret1, th_img1 = cv2.threshold(uint8_lbp_diff_close_open, thresh_hold, 255, cv2.THRESH_BINARY)
-    th_img1 = extract_biggest_connected_component(th_img1)
+    if only_max:
+        th_img1 = extract_biggest_connected_component(th_img1)
     return th_img1
 
 if __name__ == '__main__':
