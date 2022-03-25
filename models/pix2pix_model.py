@@ -88,28 +88,29 @@ class Pix2PixModel(BaseModel):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         self.fake_B = self.netG(self.real_A)  # G(A)
         # eval
-        if self.opt.name[:4] == 'RSDD':
-            # 考虑到通道数
-            self.diff_AB = torch.sum(torch.abs(self.fake_B.detach() - self.real_A.detach()), dim=1).unsqueeze(0) / self.opt.output_nc - 1.0
-            self.diff_AB[self.diff_AB >= -0.7] = 1.0
-            self.diff_AB[self.diff_AB < -0.7] = -1.0
-        elif self.opt.name[:4] == 'DAGM':
-            cls = self.opt.name.split('_')[1][5:]
-            thresh_hold = 10
-            only_max = True
-            if cls in ('1', '6', '10'):
-                if cls in ('6', '10'):
-                    thresh_hold = 0
-                    only_max = False
-                kernel = (2, 2)
-            else:
-                kernel = (3, 3)
-            A_img_tensor = self.real_A.detach()
-            A_img_repair = self.fake_B.detach()
-            A_img_tensor_numpy = A_img_tensor.squeeze().cpu().numpy()
-            A_img_repair_numpy = A_img_repair.squeeze().cpu().numpy()
-            final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, kernel, only_max)
-            self.diff_AB = (torch.tensor(final_seg_p2p).unsqueeze(0).unsqueeze(0) / 255 - 0.5) * 2
+        # if self.opt.name[:4] == 'RSDD':
+        # 考虑到通道数
+        self.diff_AB = torch.sum(torch.abs(self.fake_B.detach() - self.real_A.detach()), dim=1).unsqueeze(0) / self.opt.output_nc - 1.0
+        self.diff_AB[self.diff_AB >= -0.7] = 1.0
+        self.diff_AB[self.diff_AB < -0.7] = -1.0
+        # DAGM这段 太耗时间了 注释掉
+        # elif self.opt.name[:4] == 'DAGM':
+        #     cls = self.opt.name.split('_')[1][5:]
+        #     thresh_hold = 10
+        #     only_max = True
+        #     if cls in ('1', '6', '10'):
+        #         if cls in ('6', '10'):
+        #             thresh_hold = 0
+        #             only_max = False
+        #         kernel = (2, 2)
+        #     else:
+        #         kernel = (3, 3)
+        #     A_img_tensor = self.real_A.detach()
+        #     A_img_repair = self.fake_B.detach()
+        #     A_img_tensor_numpy = A_img_tensor.squeeze().cpu().numpy()
+        #     A_img_repair_numpy = A_img_repair.squeeze().cpu().numpy()
+        #     final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, kernel, only_max)
+        #     self.diff_AB = (torch.tensor(final_seg_p2p).unsqueeze(0).unsqueeze(0) / 255 - 0.5) * 2
         pass
 
     def backward_D(self):
