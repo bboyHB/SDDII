@@ -9,6 +9,7 @@ import numpy as np
 
 from labelme.logger import logger
 from labelme import utils
+from skimage.feature import local_binary_pattern, hog
 
 
 def extract_mask_from_label(num, same_dir=True):
@@ -182,7 +183,9 @@ def save_defective_samples():
             shutil.copyfile(os.path.join(root, c, name), os.path.join(new_sub_dir, name))
 
 def extract_biggest_connected_component(img):
-    _, labels, stats, _ = cv2.connectedComponentsWithStats(img)
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(img)
+    if num_labels == 1:
+        return img
     index = np.argmax(stats[1:, 4]) + 1
     filted_img = img * (labels == index)
     return filted_img
@@ -204,6 +207,25 @@ def cal_fids(path1, path2):
                                                   num_workers)
         output[str(dims)] = fid_value
     return output
+
+def extract_diff(img1, img2, thresh_hold, first_kernel=(3, 3), only_max=True):
+    radius = 1  # LBP算法中范围半径的取值
+    n_points = 8 * radius  # 领域像素点数
+
+    des1_lbp = local_binary_pattern(img1, n_points, radius)
+    _, des1_hog = hog(img1, visualize=True)
+    des2_lbp = local_binary_pattern(img2, n_points, radius)
+    _, des2_hog = hog(img2, visualize=True)
+    des_lbp_diff = np.abs(des1_lbp - des2_lbp)
+
+    lbp_diff_open = cv2.morphologyEx(des_lbp_diff, cv2.MORPH_OPEN, np.ones(first_kernel, np.uint8))
+    lbp_diff_close = cv2.morphologyEx(lbp_diff_open, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+    lbp_diff_close_open = cv2.morphologyEx(lbp_diff_close, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+
+    uint8_lbp_diff_close_open = np.array(lbp_diff_close_open, dtype=np.uint8)
+    ret1, th_img1 = cv2.threshold(uint8_lbp_diff_close_open, thresh_hold, 255, cv2.THRESH_BINARY)
+    th_img1 = extract_biggest_connected_component(th_img1)
+    return th_img1
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

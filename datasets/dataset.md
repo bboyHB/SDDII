@@ -27,7 +27,7 @@ python ./datasets/combine_A_and_B.py --fold_A ./datasets/DAGM_Class1_cycle_A_and
 python train.py --dataroot ./datasets/RSDDs1_pix2pix_AB --model pix2pix --name RSDDs1_pix2pix --direction BtoA --load_size 256 --crop_size 256 --ifeval --print_freq 5000
 python train.py --dataroot ./datasets/RSDDs2_pix2pix_AB --model pix2pix --name RSDDs2_pix2pix --direction BtoA --load_size 256 --crop_size 256
 python train.py --dataroot ./datasets/KSDD_pix2pix_AB --model pix2pix --name KSDD_pix2pix --direction BtoA --load_size 512 --crop_size 512
-python train.py --dataroot ./datasets/DAGM_Class1_pix2pix_AB --model pix2pix --name DAGM_Class1_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --input_nc 1 --output_nc 1 --display_port 8097 
+python train.py --dataroot ./datasets/DAGM_Class8_pix2pix_AB --model pix2pix --name DAGM_Class8_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --input_nc 1 --output_nc 1 --display_port 8097 --gpu_ids 1
 
 训练unet
 train_unet.py

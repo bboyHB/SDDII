@@ -12,7 +12,7 @@ from models import networks
 from data.base_dataset import get_transform
 from options.train_options import TrainOptions
 from torchvision.transforms import functional as F
-from datasets.process_data import cal_fids
+from datasets.process_data import cal_fids, extract_diff
 
 
 def cut_image(img_pil, height, stride):
@@ -312,7 +312,7 @@ def eval_when_train_p2p(opt, R_p2p):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if opt.name[:4] == 'RSDD':
-        eval_path = './datasets/RSDDs1_origin/test'
+        eval_path = './datasets/' + opt.name[:6] + '_origin/test'
     elif opt.name[:4] == 'DAGM':
         eval_path = './datasets/' + opt.name[:11] + '_seg/Test'
     else:
@@ -354,13 +354,21 @@ def eval_when_train_p2p(opt, R_p2p):
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             elif opt.name[:4] == 'DAGM':
-                thresh_hold = 0.04
+                cls = opt.name.split('_')[1][5:]
+                thresh_hold = 10
+                only_max = True
+                if cls in ('1', '6', '10'):
+                    if cls in ('6', '10'):
+                        thresh_hold = 0
+                        only_max = False
+                    kernel = (2, 2)
+                else:
+                    kernel = (3, 3)
                 A_img_tensor = transform(A_img).unsqueeze(0).to(device)
                 A_img_repair = R_p2p(A_img_tensor)
-                diff = torch.sum(torch.clamp(A_img_repair - A_img_tensor, min=0), dim=1) / 6.0
-                diff[diff >= thresh_hold] = 1
-                diff[diff < thresh_hold] = 0
-                final_seg_p2p = diff.cpu().numpy()
+                A_img_tensor_numpy = A_img_tensor.squeeze().cpu().numpy()
+                A_img_repair_numpy = A_img_repair.squeeze().cpu().numpy()
+                final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, kernel, only_max)
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             else:
