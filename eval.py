@@ -376,7 +376,7 @@ def eval_when_train_p2p(opt, R_p2p):
                 # final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, kernel, only_max)
                 # ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 # f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
-                thresh_hold = 30
+                thresh_hold = opt.threshold
                 A_img_tensor = transform(A_img).unsqueeze(0).to(device)
                 A_img_repair = R_p2p(A_img_tensor)
                 diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)

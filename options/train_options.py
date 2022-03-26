@@ -41,5 +41,6 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--modelpath', help='path to trained model G_A')
         parser.add_argument('--ifeval', action='store_true', help='train p2p')
         parser.add_argument('--iffid', action='store_true', help='draw fid fig')
+        parser.add_argument('--threshold', type=int, default=10, help='thresh for binary')
         self.isTrain = True
         return parser

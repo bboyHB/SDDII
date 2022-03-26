@@ -94,9 +94,9 @@ class Pix2PixModel(BaseModel):
             self.diff_AB[self.diff_AB >= 0.15] = 1.0
             self.diff_AB[self.diff_AB < 0.15] = -1.0
         elif self.opt.name[:4] == 'DAGM':
-            self.diff_AB = torch.abs((self.fake_B.detach() / 2 + 0.5) - (self.real_A.detach() / 2 + 0.5))
-            self.diff_AB[self.diff_AB >= 0.04] = 1.0
-            self.diff_AB[self.diff_AB < 0.04] = -1.0
+            self.diff_AB = torch.abs((self.fake_B.detach() / 2 + 0.5) * 255 - (self.real_A.detach() / 2 + 0.5) * 255)
+            self.diff_AB[self.diff_AB >= self.opt.threshold] = 1.0
+            self.diff_AB[self.diff_AB < self.opt.threshold] = -1.0
         # DAGM这段 太耗时间了 注释掉
         # elif self.opt.name[:4] == 'DAGM':
         #     cls = self.opt.name.split('_')[1][5:]
