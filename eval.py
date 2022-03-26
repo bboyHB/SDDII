@@ -323,6 +323,8 @@ def eval_when_train_p2p(opt, R_p2p):
     real = []
     pred_p2p = []
     ious_p2p = []
+    pre_p2p = []
+    rec_p2p = []
     time_p2p = []
     f1_p2p = []
     with torch.no_grad():
@@ -343,7 +345,10 @@ def eval_when_train_p2p(opt, R_p2p):
                     chip_tensor = transform(chip).unsqueeze(0).to(device)
                     chip_repair = R_p2p(chip_tensor)
                     # diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
+                    # ***************clamp估计不行，因为修复前后，有可能像素更大也可能更小
+                    # 另外，除以6是因为通道数为3，原像素范围为[-1,1]，逐像素相减然后压缩后，区间范围变为[-3,3]，除以6进行归一化
                     diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
+                    # 这边是由于当时训练输入size为512，和实际图片size的160或55不一样，所以要重新resize，用于与二值图计算IOU
                     diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
                     # hist, _ = np.histogram(diff.squeeze().cpu().numpy())
                     diff[diff >= thresh_hold] = 1
@@ -354,23 +359,35 @@ def eval_when_train_p2p(opt, R_p2p):
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             elif opt.name[:4] == 'DAGM':
-                cls = opt.name.split('_')[1][5:]
                 thresh_hold = 10
-                only_max = True
-                if cls in ('1', '6', '10'):
-                    if cls in ('6', '10'):
-                        thresh_hold = 0
-                        only_max = False
-                    kernel = (2, 2)
-                else:
-                    kernel = (3, 3)
+                # cls = opt.name.split('_')[1][5:]
+                # only_max = True
+                # if cls in ('1', '6', '10'):
+                #     if cls in ('6', '10'):
+                #         thresh_hold = 0
+                #         only_max = False
+                #     kernel = (2, 2)
+                # else:
+                #     kernel = (3, 3)
+                # A_img_tensor = transform(A_img).unsqueeze(0).to(device)
+                # A_img_repair = R_p2p(A_img_tensor)
+                # A_img_tensor_numpy = A_img_tensor.squeeze().cpu().numpy()
+                # A_img_repair_numpy = A_img_repair.squeeze().cpu().numpy()
+                # final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, kernel, only_max)
+                # ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
+                # f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
+
                 A_img_tensor = transform(A_img).unsqueeze(0).to(device)
                 A_img_repair = R_p2p(A_img_tensor)
-                A_img_tensor_numpy = A_img_tensor.squeeze().cpu().numpy()
-                A_img_repair_numpy = A_img_repair.squeeze().cpu().numpy()
-                final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, kernel, only_max)
+                diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
+                diff[diff > thresh_hold] = 255
+                diff[diff <= thresh_hold] = 0
+                final_seg_p2p = diff.squeeze().cpu().numpy()
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
-                f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
+                precision, recall, f1 = pixel_precision_recall_f1(final_seg_p2p, A_mask)
+                pre_p2p.append(precision)
+                rec_p2p.append(recall)
+                f1_p2p.append(f1)
             else:
                 break
             # time_p2p.append(time.time() - now)
@@ -380,8 +397,12 @@ def eval_when_train_p2p(opt, R_p2p):
             #     pred_p2p.append(0)
 
         IOU = sum(ious_p2p) / len(ious_p2p)
+        Pre = sum(pre_p2p) / len(pre_p2p)
+        Rec = sum(rec_p2p) / len(rec_p2p)
         F1 = sum(f1_p2p) / len(f1_p2p)
         print('average IOU CycleGAN+Pix2Pix:', IOU)
+        print('average Pre CycleGAN+Pix2Pix:', Pre)
+        print('average Rec CycleGAN+Pix2Pix:', Rec)
         print('average F1 Score CycleGAN+Pix2Pix:', F1)
         # print('average time CycleGAN+Pix2Pix:', sum(time_p2p) / len(time_p2p))
         #
@@ -390,7 +411,7 @@ def eval_when_train_p2p(opt, R_p2p):
         # print('img-level confusion matrix CycleGAN+Pix2Pix:')
         # print(confusion_matrix(real, pred_p2p))
     opt.no_flip = temp_no_flip
-    return IOU, F1
+    return IOU, Pre, Rec, F1
 
 def eval_fid_when_train_cyclegan(opt, R_cyc):
     temp_no_flip = opt.no_flip

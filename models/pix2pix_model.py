@@ -88,11 +88,15 @@ class Pix2PixModel(BaseModel):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         self.fake_B = self.netG(self.real_A)  # G(A)
         # eval
-        # if self.opt.name[:4] == 'RSDD':
+        if self.opt.name[:4] == 'RSDD':
         # 考虑到通道数
-        self.diff_AB = torch.sum(torch.abs(self.fake_B.detach() - self.real_A.detach()), dim=1).unsqueeze(0) / self.opt.output_nc - 1.0
-        self.diff_AB[self.diff_AB >= -0.7] = 1.0
-        self.diff_AB[self.diff_AB < -0.7] = -1.0
+            self.diff_AB = torch.abs((self.fake_B.detach() / 2 + 0.5) - (self.real_A.detach() / 2 + 0.5))
+            self.diff_AB[self.diff_AB >= 0.15] = 1.0
+            self.diff_AB[self.diff_AB < 0.15] = -1.0
+        elif self.opt.name[:4] == 'DAGM':
+            self.diff_AB = torch.abs((self.fake_B.detach() / 2 + 0.5) - (self.real_A.detach() / 2 + 0.5))
+            self.diff_AB[self.diff_AB >= 0.04] = 1.0
+            self.diff_AB[self.diff_AB < 0.04] = -1.0
         # DAGM这段 太耗时间了 注释掉
         # elif self.opt.name[:4] == 'DAGM':
         #     cls = self.opt.name.split('_')[1][5:]
