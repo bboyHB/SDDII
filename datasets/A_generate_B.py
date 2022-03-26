@@ -15,7 +15,7 @@ from options.train_options import TrainOptions
 
 opt = TrainOptions().parse()
 opt.no_flip = True
-transform = get_transform(opt)
+transform = get_transform(opt, grayscale=opt.input_nc == 1)
 
 # mix_generate = True
 G = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
