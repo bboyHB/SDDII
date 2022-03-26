@@ -19,7 +19,7 @@ transform = get_transform(opt, grayscale=opt.input_nc == 1)
 
 # mix_generate = True
 G = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
-                                        not opt.no_dropout, opt.init_type, opt.init_gain, [0])
+                                        not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
 G_dict = torch.load(opt.modelpath)  # '../checkpoints/RSDDs2_cycle/latest_net_G_A.pth'
 G_dict = {'module.'+k: v for k, v in dict(G_dict).items()}
 G.load_state_dict(G_dict)

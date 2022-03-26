@@ -360,7 +360,7 @@ def eval_when_train_p2p(opt, R_p2p):
                 f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             elif opt.name[:4] == 'DAGM':
                 thresh_hold = 10
-                # cls = opt.name.split('_')[1][5:]
+                cls = opt.name.split('_')[1][5:]
                 # only_max = True
                 # if cls in ('1', '6', '10'):
                 #     if cls in ('6', '10'):
@@ -376,13 +376,14 @@ def eval_when_train_p2p(opt, R_p2p):
                 # final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, kernel, only_max)
                 # ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 # f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
-
+                thresh_hold = 30
                 A_img_tensor = transform(A_img).unsqueeze(0).to(device)
                 A_img_repair = R_p2p(A_img_tensor)
                 diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
                 diff[diff > thresh_hold] = 255
                 diff[diff <= thresh_hold] = 0
                 final_seg_p2p = diff.squeeze().cpu().numpy()
+                final_seg_p2p = thresh_combine_open_close(final_seg_p2p)
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 precision, recall, f1 = pixel_precision_recall_f1(final_seg_p2p, A_mask)
                 pre_p2p.append(precision)
@@ -412,6 +413,20 @@ def eval_when_train_p2p(opt, R_p2p):
         # print(confusion_matrix(real, pred_p2p))
     opt.no_flip = temp_no_flip
     return IOU, Pre, Rec, F1
+
+def thresh_combine_open_close(th_img):
+    img_diff_open = cv2.morphologyEx(th_img, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    img_diff_close = cv2.morphologyEx(th_img, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(img_diff_close)
+    filted = np.zeros_like(img_diff_close, dtype=np.uint8)
+    remain_region = (img_diff_open / 255) * labels
+    remain = set()
+    for i in remain_region.flat:
+        remain.add(i)
+    remain.remove(0)
+    for r in remain:
+        filted[labels == r] = 255
+    return filted
 
 def eval_fid_when_train_cyclegan(opt, R_cyc):
     temp_no_flip = opt.no_flip
