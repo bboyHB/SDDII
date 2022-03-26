@@ -382,7 +382,7 @@ def eval_when_train_p2p(opt, R_p2p):
                 diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
                 diff[diff > thresh_hold] = 255
                 diff[diff <= thresh_hold] = 0
-                final_seg_p2p = diff.squeeze().cpu().numpy()
+                final_seg_p2p = diff.squeeze().cpu().numpy().astype(np.uint8)
                 final_seg_p2p = thresh_combine_open_close(final_seg_p2p)
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 precision, recall, f1 = pixel_precision_recall_f1(final_seg_p2p, A_mask)
