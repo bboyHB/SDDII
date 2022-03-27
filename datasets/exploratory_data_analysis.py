@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 # 默认字体大小是10
-plt.rcParams.update({'font.size': 13})
+plt.rcParams.update({'font.size': 14})
 legend_line_width = 8
 # 解决刻度符号乱码https://www.pythonheidong.com/blog/article/763890/93d7e6ca059b94c214cf/
 # site-package/matplotlib/mathtext.py 826行 fontname = 'it'
@@ -168,6 +168,37 @@ def areas_distribution_RSDDs():
     plt.savefig(f'RSDDs_defect_areas.pdf', format='pdf', dpi=600)
     plt.show()
 
+def width_height_product_distribution_RSDDs():
+    root1 = "RSDDs1_seg/train/mask"
+    root2 = "RSDDs2_seg/train/mask"
+    names = ('I型RSDDs数据集', 'II型RSDDs数据集')
+
+    for i, r in enumerate((root1, root2)):
+        img_names = os.listdir(r)
+        side_length = 160 if r == root1 else 55
+        areas = []
+        for img_name in img_names:
+            bin_img_path = os.path.join(r, img_name)
+            bin_img = cv2.imread(bin_img_path, cv2.IMREAD_GRAYSCALE)
+            # 阈值二值化，去除一些小颗粒
+            bin_img[bin_img < 200] = 0
+            bin_img[bin_img >= 200] = 255
+            num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(bin_img)
+            # 无瑕疵跳过
+            if num_labels == 1:
+                continue
+            width_height_product = stats[1:, 2] * stats[1:, 3]
+            areas.extend(width_height_product / (side_length * side_length))
+        areas = sorted(areas)
+        plt.plot(areas, label=names[i])
+        plt.yscale('log')
+        plt.tight_layout()
+    leg = plt.legend(loc=4)
+    leg_lines = leg.get_lines()
+    plt.setp(leg_lines, linewidth=legend_line_width)
+    plt.savefig(f'RSDDs_defect_width_height_product.pdf', format='pdf', dpi=600)
+    plt.show()
+
 def aspect_ratios_distribution_RSDDs():
     root1 = "RSDDs1_seg/train/mask"
     root2 = "RSDDs2_seg/train/mask"
@@ -244,6 +275,30 @@ def areas_distribution_DAGM():
     leg_lines = leg.get_lines()
     plt.setp(leg_lines, linewidth=legend_line_width)
     plt.savefig(f'DAGM_defect_areas.pdf', format='pdf', dpi=600)
+    plt.show()
+
+def width_height_product_distribution_DAGM():
+    for i in range(1, 11):
+        root = f"DAGM_Class{i}_seg/train/mask"
+        img_names = os.listdir(root)
+        areas = []
+        for img_name in img_names:
+            bin_img_path = os.path.join(root, img_name)
+            bin_img = cv2.imread(bin_img_path, cv2.IMREAD_GRAYSCALE)
+            # 阈值二值化，去除一些小颗粒
+            bin_img[bin_img < 200] = 0
+            bin_img[bin_img >= 200] = 255
+            num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(bin_img)
+            width_height_product = stats[1:, 2] * stats[1:, 3]
+            areas.extend(width_height_product / (512 * 512))
+        areas = sorted(areas)
+        plt.plot(areas, label=f'类别{i}')
+        plt.yscale('log')
+        plt.tight_layout()
+    leg = plt.legend()
+    leg_lines = leg.get_lines()
+    plt.setp(leg_lines, linewidth=legend_line_width)
+    plt.savefig(f'DAGM_defect_width_height_product.pdf', format='pdf', dpi=600)
     plt.show()
 
 def color_distribution_DAGM():
@@ -519,8 +574,10 @@ if __name__ == '__main__':
     # centroids_ratios_distribution_RSDDs()
     # aspect_ratios_distribution_DAGM()
     # aspect_ratios_distribution_RSDDs()
-    areas_distribution_DAGM()
+    # areas_distribution_DAGM()
     # areas_distribution_RSDDs()
+    width_height_product_distribution_DAGM()
+    width_height_product_distribution_RSDDs()
 
 
 # 自定义xy轴的拉伸比例 https://matplotlib.org/stable/gallery/scales/custom_scale.html

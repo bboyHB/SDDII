@@ -101,36 +101,44 @@ def filt_big_pixel_block(final_seg):
     return np.array(label_map, dtype=np.uint8)
 
 def eval_compare():
-    dataset_name = 'RSDDs1'
     opt = TrainOptions().parse()
+    dataset_name = opt.eval_dataset_name
+    output_dir = dataset_name+'_eval_output/'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    if dataset_name not in [f'DAGM_Class{i}' for i in range(1, 11)] + ['RSDDs1', 'RSDDs2']:
+        return
     opt.no_flip = True
     transform = get_transform(opt)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(f'cuda:{opt.gpu_ids[0]}' if torch.cuda.is_available() else 'cpu')
     R = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
-                                            not opt.no_dropout, opt.init_type, opt.init_gain, [0])
+                                            not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
     R_dict = torch.load('checkpoints/' + dataset_name + '_cycle/latest_net_G_B.pth')
     R_dict = {'module.'+k: v for k, v in dict(R_dict).items()}
     R.load_state_dict(R_dict)
     R.to(device)
 
     R_p2p = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'unet_256', 'batch',
-                                            not opt.no_dropout, opt.init_type, opt.init_gain, [0])
-    R_p2p_dict = torch.load('checkpoints/' + dataset_name + '_pix2pix/latest_net_G.pth')
+                                            not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
+    R_p2p_dict = torch.load('checkpoints/' + dataset_name + f'_pix2pix/{opt.epoch}_net_G.pth')
     # R_p2p_dict = torch.load('checkpoints/RSDDs2_pix2pix/10_net_G.pth')
     R_p2p_dict = {'module.'+k: v for k, v in dict(R_p2p_dict).items()}
     R_p2p.load_state_dict(R_p2p_dict)
     R_p2p.to(device)
 
-    eval_path = './datasets/' + dataset_name + '_origin/test'
+    if dataset_name[:4] == 'RSDD':
+        eval_path = './datasets/' + dataset_name + '_origin/test'
+        thresh_hold = opt.threshold / 255  # 0.15
+    else:
+        eval_path = './datasets/' + dataset_name + '_seg/test'
+        thresh_hold = opt.threshold
     img_path = os.path.join(eval_path, 'img')
     mask_path = os.path.join(eval_path, 'mask')
 
-    U = torch.load('UNET_RSDDs1_imgsz256_e50_lr0.012021-05-15_10-56-48.pth', device)
-
+    U = torch.load(f'UNET_{dataset_name}_imgsz{opt.load_size}_e{opt.epoch_count}_lr{opt.lr}.pth', device)
 
     with torch.no_grad():
-        thresh_hold = 0.15
         real = []
         pred_cycle = []
         pred_p2p = []
@@ -159,7 +167,10 @@ def eval_compare():
 
         for name in os.listdir(img_path):
             A_path = os.path.join(img_path, name)
-            A_img = Image.open(A_path).convert('RGB')
+            if opt.input_nc == 1:
+                A_img = Image.open(A_path).convert('L')
+            else:
+                A_img = Image.open(A_path).convert('RGB')
             A_mask = cv2.imread(os.path.join(mask_path, name), cv2.IMREAD_GRAYSCALE)
             if np.max(A_mask) > 0:
                 real.append(1)
@@ -168,16 +179,25 @@ def eval_compare():
 
             segs = []
             now = time.time()
-            for chip in cut_image(A_img, A_img.width, A_img.width // 2):
-                chip_tensor = transform(chip).unsqueeze(0).to(device)
-                chip_repair = R(chip_tensor)
-                diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
-                # diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
-                diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
-                diff[diff >= thresh_hold] = 1
-                diff[diff < thresh_hold] = 0
-                segs.append(diff.squeeze().cpu().numpy())
-            final_seg_cycle = gether_seg(segs, A_img.size, A_img.width, A_img.width // 2)
+            if dataset_name[:4] == 'RSDD':
+                for chip in cut_image(A_img, A_img.width, A_img.width // 2):
+                    chip_tensor = transform(chip).unsqueeze(0).to(device)
+                    chip_repair = R(chip_tensor)
+                    diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
+                    # diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
+                    diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
+                    diff[diff >= thresh_hold] = 1
+                    diff[diff < thresh_hold] = 0
+                    segs.append(diff.squeeze().cpu().numpy())
+                final_seg_cycle = gether_seg(segs, A_img.size, A_img.width, A_img.width // 2)
+            else:
+                A_img_tensor = transform(A_img).unsqueeze(0).to(device)
+                A_img_repair = R(A_img_tensor)
+                diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
+                diff[diff > thresh_hold] = 255
+                diff[diff <= thresh_hold] = 0
+                final_seg_cycle = diff.squeeze().cpu().numpy().astype(np.uint8)
+                final_seg_cycle = thresh_combine_open_close(final_seg_cycle)
             # iu_cycle = num_intersection_union(final_seg_cycle, A_mask)
             # intersection_cycle += iu_cycle[0]
             # union_cycle += iu_cycle[1]
@@ -194,21 +214,30 @@ def eval_compare():
 
             segs_p2p = []
             now = time.time()
-            for chip in cut_image(A_img, A_img.width, A_img.width // 2):
-                chip_tensor = transform(chip).unsqueeze(0).to(device)
-                chip_repair = R_p2p(chip_tensor)
-                if dataset_name == 'RSDDs1':
-                    diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
-                elif dataset_name == 'RSDDs2':
-                    diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
-                else:
-                    exit()
-                diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
-                # hist, _ = np.histogram(diff.squeeze().cpu().numpy())
-                diff[diff >= thresh_hold] = 1
-                diff[diff < thresh_hold] = 0
-                segs_p2p.append(diff.squeeze().cpu().numpy())
-            final_seg_p2p = gether_seg(segs_p2p, A_img.size, A_img.width, A_img.width // 2)
+            if dataset_name[:4] == 'RSDD':
+                for chip in cut_image(A_img, A_img.width, A_img.width // 2):
+                    chip_tensor = transform(chip).unsqueeze(0).to(device)
+                    chip_repair = R_p2p(chip_tensor)
+                    if dataset_name == 'RSDDs1':
+                        diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
+                    elif dataset_name == 'RSDDs2':
+                        diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
+                    else:
+                        exit()
+                    diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
+                    # hist, _ = np.histogram(diff.squeeze().cpu().numpy())
+                    diff[diff >= thresh_hold] = 1
+                    diff[diff < thresh_hold] = 0
+                    segs_p2p.append(diff.squeeze().cpu().numpy())
+                final_seg_p2p = gether_seg(segs_p2p, A_img.size, A_img.width, A_img.width // 2)
+            else:
+                A_img_tensor = transform(A_img).unsqueeze(0).to(device)
+                A_img_repair = R_p2p(A_img_tensor)
+                diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
+                diff[diff > thresh_hold] = 255
+                diff[diff <= thresh_hold] = 0
+                final_seg_p2p = diff.squeeze().cpu().numpy().astype(np.uint8)
+                final_seg_p2p = thresh_combine_open_close(final_seg_p2p)
             if dataset_name == 'RSDDs1':
                 final_seg_p2p = filt_small_pixel_block(final_seg_p2p)
             # final_seg_p2p = filt_big_pixel_block(final_seg_p2p)
@@ -228,15 +257,24 @@ def eval_compare():
 
             segs_unet = []
             now = time.time()
-            for chip in cut_image(A_img, A_img.width, A_img.width // 2):
-                chip_tensor = transform(chip).unsqueeze(0).to(device)
-                chip_repair = U(chip_tensor)
-                diff = chip_repair / 2 + 0.5
-                diff = torch.nn.functional.interpolate(diff, (A_img.width, A_img.width))
-                diff[diff >= 0.5] = 1
-                diff[diff < 0.5] = 0
-                segs_unet.append(diff.squeeze().cpu().numpy())
-            final_seg_unet = gether_seg(segs_unet, A_img.size, A_img.width, A_img.width // 2)
+            if dataset_name[:4] == 'RSDD':
+                for chip in cut_image(A_img, A_img.width, A_img.width // 2):
+                    chip_tensor = transform(chip).unsqueeze(0).to(device)
+                    chip_repair = U(chip_tensor)
+                    diff = chip_repair / 2 + 0.5
+                    diff = torch.nn.functional.interpolate(diff, (A_img.width, A_img.width))
+                    diff[diff >= 0.5] = 1
+                    diff[diff < 0.5] = 0
+                    segs_unet.append(diff.squeeze().cpu().numpy())
+                final_seg_unet = gether_seg(segs_unet, A_img.size, A_img.width, A_img.width // 2)
+            else:
+                A_img_tensor = transform(A_img).unsqueeze(0).to(device)
+                A_img_repair = U(A_img_tensor)
+                diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
+                diff[diff > thresh_hold] = 255
+                diff[diff <= thresh_hold] = 0
+                final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
+                # final_seg_unet = thresh_combine_open_close(final_seg_unet)
             # final_seg_unet = filt_small_pixel_block(final_seg_unet)
             # iu_unet = num_intersection_union(final_seg_unet, A_mask)
             # intersection_unet += iu_unet[0]
@@ -253,16 +291,12 @@ def eval_compare():
                 pred_unet.append(0)
 
             img_origin_np = cv2.imread(A_path, cv2.IMREAD_GRAYSCALE)
-            height_per = img_origin_np.shape[0]
-            width_per = img_origin_np.shape[1]
-            interval = 5
-            compare_img = np.ones((height_per, width_per*5 + interval*4)) * 255
-            now_x, now_y = 0, 0
-            imgs2paste = [img_origin_np, final_seg_unet, final_seg_cycle, final_seg_p2p, A_mask]
-            for img2paste in imgs2paste:
-                compare_img[now_y: now_y+height_per, now_x: now_x+width_per] = img2paste
-                now_x += interval + width_per
-            cv2.imwrite(dataset_name+'_eval_output/'+name[:-3]+'png', compare_img)
+            names_to_save = ('origin', 'unet', 'cycle', 'p2p', 'mask')
+            imgs_to_save = (img_origin_np, final_seg_unet, final_seg_cycle, final_seg_p2p, A_mask)
+            for i, img in enumerate(imgs_to_save):
+                pre_suf = name.split('.')
+                name2save = f'{pre_suf[0]}_{names_to_save[i]}.png'
+                cv2.imwrite(os.path.join(output_dir, name2save), img)
             # 显示结果
             # cv2.imshow('1', cv2.imread(A_path))
             # cv2.imshow('2', A_mask)
@@ -304,6 +338,17 @@ def eval_compare():
         print(confusion_matrix(real, pred_p2p))
         pass
 
+
+def save_one_total_eval_img(img_origin_np, final_seg_unet, final_seg_cycle, final_seg_p2p, A_mask, output_dir, name, interval = 5):
+    height_per = img_origin_np.shape[0]
+    width_per = img_origin_np.shape[1]
+    compare_img = np.ones((height_per, width_per * 5 + interval * 4)) * 255
+    now_x, now_y = 0, 0
+    imgs2paste = [img_origin_np, final_seg_unet, final_seg_cycle, final_seg_p2p, A_mask]
+    for img2paste in imgs2paste:
+        compare_img[now_y: now_y + height_per, now_x: now_x + width_per] = img2paste
+        now_x += interval + width_per
+    cv2.imwrite(os.path.join(output_dir, name), compare_img)
 
 def eval_when_train_p2p(opt, R_p2p):
     temp_no_flip = opt.no_flip
@@ -359,7 +404,6 @@ def eval_when_train_p2p(opt, R_p2p):
                 ious_p2p.append(seg_iou_single_img(final_seg_p2p, A_mask))
                 f1_p2p.append(pixel_precision_recall_f1(final_seg_p2p, A_mask)[2])
             elif opt.name[:4] == 'DAGM':
-                thresh_hold = 10
                 cls = opt.name.split('_')[1][5:]
                 # only_max = True
                 # if cls in ('1', '6', '10'):
