@@ -208,7 +208,7 @@ def cal_fids(path1, path2):
         output[str(dims)] = fid_value
     return output
 
-def extract_diff(img1, img2, thresh_hold, first_kernel=(3, 3), only_max=True):
+def extract_diff(img1, img2, thresh_hold, first_kernel=(3, 3), second_kernel=(9, 9), third_kernel=(3, 3), only_max=True):
     radius = 1  # LBP算法中范围半径的取值
     n_points = 8 * radius  # 领域像素点数
 
@@ -219,8 +219,8 @@ def extract_diff(img1, img2, thresh_hold, first_kernel=(3, 3), only_max=True):
     des_lbp_diff = np.abs(des1_lbp - des2_lbp)
 
     lbp_diff_open = cv2.morphologyEx(des_lbp_diff, cv2.MORPH_OPEN, np.ones(first_kernel, np.uint8))
-    lbp_diff_close = cv2.morphologyEx(lbp_diff_open, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
-    lbp_diff_close_open = cv2.morphologyEx(lbp_diff_close, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    lbp_diff_close = cv2.morphologyEx(lbp_diff_open, cv2.MORPH_CLOSE, np.ones(second_kernel, np.uint8))
+    lbp_diff_close_open = cv2.morphologyEx(lbp_diff_close, cv2.MORPH_OPEN, np.ones(third_kernel, np.uint8))
 
     uint8_lbp_diff_close_open = np.array(lbp_diff_close_open, dtype=np.uint8)
     ret1, th_img1 = cv2.threshold(uint8_lbp_diff_close_open, thresh_hold, 255, cv2.THRESH_BINARY)

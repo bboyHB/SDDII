@@ -240,7 +240,10 @@ def eval_compare():
                 if opt.seg_plan_b:
                     A_img_tensor_numpy = A_img_tensor.squeeze().cpu().numpy()
                     A_img_repair_numpy = A_img_repair.squeeze().cpu().numpy()
-                    final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold, (opt.first_kernel, opt.first_kernel), True)
+                    final_seg_p2p = extract_diff(A_img_tensor_numpy, A_img_repair_numpy, thresh_hold,
+                                                 (opt.first_kernel, opt.first_kernel),
+                                                 (opt.second_kernel, opt.second_kernel),
+                                                 (opt.third_kernel, opt.third_kernel), True)
                 else:
                     diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
                     diff[diff > thresh_hold] = 255

@@ -47,5 +47,7 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--eval_dataset_name', type=str, help='dataset name')
         parser.add_argument('--seg_plan_b', action='store_true', help='planB segmentation')
         parser.add_argument('--first_kernel', type=int, default=2, help='planB segmentation kernel size')
+        parser.add_argument('--second_kernel', type=int, default=9, help='planB segmentation kernel size')
+        parser.add_argument('--third_kernel', type=int, default=5, help='planB segmentation kernel size')
         self.isTrain = True
         return parser
