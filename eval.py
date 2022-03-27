@@ -12,7 +12,7 @@ from models import networks
 from data.base_dataset import get_transform
 from options.train_options import TrainOptions
 from torchvision.transforms import functional as F
-from datasets.process_data import cal_fids, extract_diff
+from datasets.process_data import cal_fids, extract_diff, extract_biggest_connected_component
 
 
 def cut_image(img_pil, height, stride):
@@ -249,7 +249,7 @@ def eval_compare():
                     diff[diff > thresh_hold] = 255
                     diff[diff <= thresh_hold] = 0
                     final_seg_p2p = diff.squeeze().cpu().numpy().astype(np.uint8)
-                    final_seg_p2p = thresh_combine_open_close(final_seg_p2p, True)
+                    final_seg_p2p = thresh_combine_open_close(final_seg_p2p, opt.third_kernel, opt.f, opt.onlymax)
             if dataset_name == 'RSDDs1':
                 final_seg_p2p = filt_small_pixel_block(final_seg_p2p)
             # final_seg_p2p = filt_big_pixel_block(final_seg_p2p)
@@ -474,7 +474,7 @@ def eval_when_train_p2p(opt, R_p2p):
     opt.no_flip = temp_no_flip
     return IOU, Pre, Rec, F1
 
-def thresh_combine_open_close(th_img, f=False):
+def thresh_combine_open_close(th_img, k=5, f=False, onlymax=False):
     img_diff_open = cv2.morphologyEx(th_img, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
     img_diff_close = cv2.morphologyEx(th_img, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(img_diff_close)
@@ -488,7 +488,9 @@ def thresh_combine_open_close(th_img, f=False):
         filted[labels == r] = 255
     # **************
     if f:
-        filted = cv2.morphologyEx(filted, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+        filted = cv2.morphologyEx(filted, cv2.MORPH_CLOSE, np.ones((k, k), np.uint8))
+    if onlymax:
+        filted = extract_biggest_connected_component(filted)
     return filted
 
 def eval_fid_when_train_cyclegan(opt, R_cyc):

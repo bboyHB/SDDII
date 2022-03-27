@@ -49,5 +49,7 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--first_kernel', type=int, default=2, help='planB segmentation kernel size')
         parser.add_argument('--second_kernel', type=int, default=9, help='planB segmentation kernel size')
         parser.add_argument('--third_kernel', type=int, default=5, help='planB segmentation kernel size')
+        parser.add_argument('--f', action='store_true', help='f')
+        parser.add_argument('--onlymax', action='store_true', help='onlymax')
         self.isTrain = True
         return parser
