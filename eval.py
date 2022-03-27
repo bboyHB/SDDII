@@ -114,7 +114,7 @@ def eval_compare():
     device = torch.device(f'cuda:{opt.gpu_ids[0]}' if torch.cuda.is_available() else 'cpu')
     R = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
                                             not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
-    R_dict = torch.load('checkpoints/' + dataset_name + '_cycle/latest_net_G_B.pth')
+    R_dict = torch.load('checkpoints/' + dataset_name + f'_cycle{opt.suffix}/{opt.modelpath}_net_G_B.pth')
     R_dict = {'module.'+k: v for k, v in dict(R_dict).items()}
     R.load_state_dict(R_dict)
     R.to(device)

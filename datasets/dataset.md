@@ -39,7 +39,7 @@ python train.py --dataroot ./datasets/KSDD_pix2pix_AB --model pix2pix --name KSD
 python train.py --dataroot ./datasets/DAGM_Class8_pix2pix_AB --model pix2pix --name DAGM_Class8_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --input_nc 1 --output_nc 1 --n_epochs 25 --n_epochs_decay 25 --display_port 8097 --gpu_ids 1
 
 训练unet
-train_unet.py
+train_unet.py --dataset DAMG_Class1
 
 运行
-python eval.py
+python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --suffix _old --modelpath latest --epoch 100 --threshold 20 --eval_dataset_name DAGM_Class1

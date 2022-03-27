@@ -37,8 +37,8 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--lr_policy', type=str, default='linear', help='learning rate policy. [linear | step | plateau | cosine]')
         parser.add_argument('--lr_decay_iters', type=int, default=50, help='multiply by a gamma every lr_decay_iters iterations')
         # custom
-        parser.add_argument('--datadir', help='path of A')
-        parser.add_argument('--modelpath', help='path to trained model G_A')
+        parser.add_argument('--datadir', type=str, help='path of A')
+        parser.add_argument('--modelpath', type=str, help='path to trained model G_A')
         parser.add_argument('--ifeval', action='store_true', help='train p2p')
         parser.add_argument('--iffid', action='store_true', help='draw fid fig')
         parser.add_argument('--threshold', type=int, default=10, help='thresh for binary')
