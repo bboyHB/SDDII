@@ -119,8 +119,12 @@ def eval_compare():
     R.load_state_dict(R_dict)
     R.to(device)
 
-    R_p2p = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'unet_256', 'batch',
+    if dataset_name[:4] == 'DAGM':
+        R_p2p = networks.define_G(1, 1, opt.ngf, 'unet_256', 'batch',
                                             not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
+    else:
+        R_p2p = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'unet_256', 'batch',
+                              not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
     R_p2p_dict = torch.load('checkpoints/' + dataset_name + f'_pix2pix/{opt.epoch}_net_G.pth')
     # R_p2p_dict = torch.load('checkpoints/RSDDs2_pix2pix/10_net_G.pth')
     R_p2p_dict = {'module.'+k: v for k, v in dict(R_p2p_dict).items()}
