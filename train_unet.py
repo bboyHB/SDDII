@@ -22,6 +22,7 @@ parser.add_argument('--epoch', type=int, default=50, help='train epoch')
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
 parser.add_argument('--lr_step', type=int, default=20, help='lr decay epoch')
 parser.add_argument('--gpu', type=int, default=0, help='lr decay epoch')
+parser.add_argument('--display_feq', type=int, default=50, help='lr decay epoch')
 
 args = parser.parse_args()
 
@@ -81,7 +82,7 @@ def train_unet():
 
             glbstep += 1
             writer.add_scalar(tag='Train/loss', scalar_value=loss.item(), global_step=glbstep)
-            if glbstep % 2 == 0 and torch.max(mask_tensor) == 1.0:
+            if glbstep % args.display_feq == 0 and torch.max(mask_tensor) == 1.0:
                 df = 'CHW'
                 if args.channel == 1:
                     df = 'HW'
