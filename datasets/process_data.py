@@ -208,7 +208,7 @@ def cal_fids(path1, path2):
         output[str(dims)] = fid_value
     return output
 
-def extract_diff(img1, img2, thresh_hold, first_kernel=(3, 3), second_kernel=(9, 9), third_kernel=(3, 3), only_max=True):
+def extract_diff(img1, img2, thresh_hold, first_kernel=(2, 2), second_kernel=(9, 9), third_kernel=(5, 5), only_max=True):
     radius = 1  # LBP算法中范围半径的取值
     n_points = 8 * radius  # 领域像素点数
 
