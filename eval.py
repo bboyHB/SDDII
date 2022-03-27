@@ -287,8 +287,8 @@ def eval_compare():
                 diff[diff <= thresh_hold3] = 0
                 final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
 
-                if dataset_name[-1] in ('4', '7', '10'):
-                    if dataset_name[-1] in ('7', '10'):
+                if dataset_name[-1] in ('4', '7', '0'):
+                    if dataset_name[-1] in ('7', '0'):
                         final_seg_unet = thresh_combine_open_close(final_seg_unet)
                     inverse = np.array(final_seg_unet, dtype=np.uint8)
                     final_seg_unet[inverse == 0] = 255
