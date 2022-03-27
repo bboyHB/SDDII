@@ -18,9 +18,9 @@ parser = argparse.ArgumentParser('train UNET')
 parser.add_argument('--dataset', type=str, default='DAGM_Class1', help='dataset_seg path')
 parser.add_argument('--imgsize', type=int, default=512, help='image size')
 parser.add_argument('--channel', type=int, default=1, help='image channel')
-parser.add_argument('--epoch', type=int, default=50, help='image channel')
-parser.add_argument('--lr', type=float, default=0.01, help='image channel')
-parser.add_argument('--lr_step', type=int, default=20, help='image channel')
+parser.add_argument('--epoch', type=int, default=50, help='train epoch')
+parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
+parser.add_argument('--lr_step', type=int, default=20, help='lr decay epoch')
 
 args = parser.parse_args()
 
@@ -81,7 +81,10 @@ def train_unet():
             glbstep += 1
             writer.add_scalar(tag='Train/loss', scalar_value=loss.item(), global_step=glbstep)
             if glbstep % 2 == 0 and torch.max(mask_tensor) == 1.0:
-                writer.add_image('img/img', img_tensor.squeeze(), glbstep)
+                df = 'CHW'
+                if args.channel == 1:
+                    df = 'HW'
+                writer.add_image('img/img', img_tensor.squeeze(), glbstep, dataformats=df)
                 writer.add_image('img/output', output.squeeze() / 2 + 0.5, glbstep, dataformats='HW')
                 writer.add_image('img/mask', mask_tensor.squeeze() / 2 + 0.5, glbstep, dataformats='HW')
         step_lr.step()
