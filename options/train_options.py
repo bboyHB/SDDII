@@ -45,5 +45,7 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--threshold2', type=int, default=10, help='thresh for binary')
         parser.add_argument('--threshold3', type=int, default=127, help='thresh for binary')
         parser.add_argument('--eval_dataset_name', type=str, help='dataset name')
+        parser.add_argument('--seg_plan_b', action='store_true', help='planB segmentation')
+        parser.add_argument('--first_kernel', type=int, default=2, help='planB segmentation kernel size')
         self.isTrain = True
         return parser
