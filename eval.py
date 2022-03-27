@@ -109,7 +109,7 @@ def eval_compare():
     if dataset_name not in [f'DAGM_Class{i}' for i in range(1, 11)] + ['RSDDs1', 'RSDDs2']:
         return
     opt.no_flip = True
-    transform = get_transform(opt)
+    transform = get_transform(opt, grayscale=opt.input_nc == 1)
 
     device = torch.device(f'cuda:{opt.gpu_ids[0]}' if torch.cuda.is_available() else 'cpu')
     R = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
