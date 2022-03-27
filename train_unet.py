@@ -8,9 +8,21 @@ from torch.utils.tensorboard import SummaryWriter
 import torch
 from unet.unet import UNet
 import cv2
+import argparse
 import numpy as np
 from datetime import datetime
 from models import networks
+
+
+parser = argparse.ArgumentParser('train UNET')
+parser.add_argument('--dataset', type=str, default='DAGM_Class1', help='dataset_seg path')
+parser.add_argument('--imgsize', type=int, default=512, help='image size')
+parser.add_argument('--channel', type=int, default=1, help='image channel')
+parser.add_argument('--epoch', type=int, default=50, help='image channel')
+parser.add_argument('--lr', type=float, default=0.01, help='image channel')
+parser.add_argument('--lr_step', type=int, default=20, help='image channel')
+
+args = parser.parse_args()
 
 
 def extract_flaws(bin_img):
@@ -25,18 +37,18 @@ def extract_flaws(bin_img):
 
 
 def train_unet():
-    lr = 0.01
-    lr_step = 20
-    epoch = 50
-    img_size = (256, 256)
+    lr = args.lr
+    lr_step = args.lr_step
+    epoch = args.epoch
+    img_size = (args.imgsize, args.imgsize)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    ae = UNet(n_classes=1).to(device)
+    ae = UNet(n_channels=args.channel, n_classes=1).to(device)
     criterion = nn.MSELoss()
 
     optimizer = SGD(ae.parameters(), lr=lr, momentum=0.9, weight_decay=1e-8)
     step_lr = StepLR(optimizer, lr_step)
 
-    dataset = 'RSDDs1'
+    dataset = args.dataset
     data_path = './datasets/' + dataset + '_seg/train'
     stamp = 'UNET_' + dataset + '_imgsz' + str(img_size[0]) + '_e' + str(epoch) + '_lr' + str(lr)
     time_stamp = "{0:%Y-%m-%d_%H-%M-%S}".format(datetime.now())
@@ -48,7 +60,10 @@ def train_unet():
         mask_path = os.path.join(data_path, 'mask')
         for index, img_name in enumerate(os.listdir(img_path)):
             print(e, index)
-            img = Image.open(os.path.join(img_path, img_name)).convert('RGB')
+            if args.channel == 1:
+                img = Image.open(os.path.join(img_path, img_name)).convert('L')
+            else:
+                img = Image.open(os.path.join(img_path, img_name)).convert('RGB')
             mask = Image.open(os.path.join(mask_path, img_name)).convert('L')
             img = img.resize(img_size)
             mask = mask.resize(img_size)

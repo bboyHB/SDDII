@@ -71,7 +71,7 @@ def extract_mask_from_label_and_output_seg_dir(i, same_dir=True):
     root = os.path.join(labeled_DAGM_path, f'Class{i}_relabel')
     content = ('Train', 'Test')
     for t in content:
-        out_dir = f'DAGM_Class{i}_seg/{t}'
+        out_dir = f'DAGM_Class{i}_seg/{t.lower()}'
         out_img_dir = os.path.join(out_dir, 'img')
         out_mask_dir = os.path.join(out_dir, 'mask')
         if not os.path.exists(out_dir):
