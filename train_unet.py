@@ -21,6 +21,7 @@ parser.add_argument('--channel', type=int, default=1, help='image channel')
 parser.add_argument('--epoch', type=int, default=50, help='train epoch')
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
 parser.add_argument('--lr_step', type=int, default=20, help='lr decay epoch')
+parser.add_argument('--gpu', type=int, default=0, help='lr decay epoch')
 
 args = parser.parse_args()
 
@@ -41,7 +42,7 @@ def train_unet():
     lr_step = args.lr_step
     epoch = args.epoch
     img_size = (args.imgsize, args.imgsize)
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    device = torch.device(f'cuda:{args.gpu}') if torch.cuda.is_available() else torch.device('cpu')
     ae = UNet(n_channels=args.channel, n_classes=1).to(device)
     criterion = nn.MSELoss()
 
