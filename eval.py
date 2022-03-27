@@ -119,11 +119,7 @@ def eval_compare():
     R.load_state_dict(R_dict)
     R.to(device)
 
-    if dataset_name[:4] == 'DAGM':
-        R_p2p = networks.define_G(1, 1, opt.ngf, 'unet_256', 'batch',
-                                            not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
-    else:
-        R_p2p = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'unet_256', 'batch',
+    R_p2p = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'unet_256', 'batch',
                               not opt.no_dropout, opt.init_type, opt.init_gain, opt.gpu_ids)
     R_p2p_dict = torch.load('checkpoints/' + dataset_name + f'_pix2pix/{opt.epoch}_net_G.pth')
     # R_p2p_dict = torch.load('checkpoints/RSDDs2_pix2pix/10_net_G.pth')
@@ -291,8 +287,8 @@ def eval_compare():
                 diff[diff <= thresh_hold3] = 0
                 final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
 
-                if dataset_name[-1] in ('4', '7'):
-                    if dataset_name[-1] == '7':
+                if dataset_name[-1] in ('4', '7', '10'):
+                    if dataset_name[-1] in ('7', '10'):
                         final_seg_unet = thresh_combine_open_close(final_seg_unet)
                     inverse = np.array(final_seg_unet, dtype=np.uint8)
                     final_seg_unet[inverse == 0] = 255
