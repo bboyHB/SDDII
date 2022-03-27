@@ -42,6 +42,8 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--ifeval', action='store_true', help='train p2p')
         parser.add_argument('--iffid', action='store_true', help='draw fid fig')
         parser.add_argument('--threshold', type=int, default=10, help='thresh for binary')
+        parser.add_argument('--threshold2', type=int, default=10, help='thresh for binary')
+        parser.add_argument('--threshold3', type=int, default=127, help='thresh for binary')
         parser.add_argument('--eval_dataset_name', type=str, help='dataset name')
         self.isTrain = True
         return parser

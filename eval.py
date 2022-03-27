@@ -130,9 +130,13 @@ def eval_compare():
     if dataset_name[:4] == 'RSDD':
         eval_path = './datasets/' + dataset_name + '_origin/test'
         thresh_hold = opt.threshold / 255  # 0.15
+        thresh_hold2 = opt.threshold2 / 255
+        thresh_hold3 = opt.threshold3 / 255
     else:
         eval_path = './datasets/' + dataset_name + '_seg/test'
         thresh_hold = opt.threshold
+        thresh_hold2 = opt.threshold2
+        thresh_hold3 = opt.threshold3
     img_path = os.path.join(eval_path, 'img')
     mask_path = os.path.join(eval_path, 'mask')
 
@@ -186,16 +190,16 @@ def eval_compare():
                     diff = torch.sum(torch.abs(chip_repair - chip_tensor), dim=1) / 6.0
                     # diff = torch.sum(torch.clamp(chip_repair - chip_tensor, min=0), dim=1) / 6.0
                     diff = torch.nn.functional.interpolate(diff.unsqueeze(0), (A_img.width, A_img.width))
-                    diff[diff >= thresh_hold] = 1
-                    diff[diff < thresh_hold] = 0
+                    diff[diff >= thresh_hold2] = 1
+                    diff[diff < thresh_hold2] = 0
                     segs.append(diff.squeeze().cpu().numpy())
                 final_seg_cycle = gether_seg(segs, A_img.size, A_img.width, A_img.width // 2)
             else:
                 A_img_tensor = transform(A_img).unsqueeze(0).to(device)
                 A_img_repair = R(A_img_tensor)
                 diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
-                diff[diff > thresh_hold] = 255
-                diff[diff <= thresh_hold] = 0
+                diff[diff > thresh_hold2] = 255
+                diff[diff <= thresh_hold2] = 0
                 final_seg_cycle = diff.squeeze().cpu().numpy().astype(np.uint8)
                 final_seg_cycle = thresh_combine_open_close(final_seg_cycle)
             # iu_cycle = num_intersection_union(final_seg_cycle, A_mask)
@@ -263,16 +267,16 @@ def eval_compare():
                     chip_repair = U(chip_tensor)
                     diff = chip_repair / 2 + 0.5
                     diff = torch.nn.functional.interpolate(diff, (A_img.width, A_img.width))
-                    diff[diff >= 0.5] = 1
-                    diff[diff < 0.5] = 0
+                    diff[diff >= thresh_hold3] = 1
+                    diff[diff < thresh_hold3] = 0
                     segs_unet.append(diff.squeeze().cpu().numpy())
                 final_seg_unet = gether_seg(segs_unet, A_img.size, A_img.width, A_img.width // 2)
             else:
                 A_img_tensor = transform(A_img).unsqueeze(0).to(device)
                 A_img_repair = U(A_img_tensor)
                 diff = torch.abs((A_img_repair / 2 + 0.5) * 255 - (A_img_tensor / 2 + 0.5) * 255)
-                diff[diff > thresh_hold] = 255
-                diff[diff <= thresh_hold] = 0
+                diff[diff > thresh_hold3] = 255
+                diff[diff <= thresh_hold3] = 0
                 final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
                 # final_seg_unet = thresh_combine_open_close(final_seg_unet)
             # final_seg_unet = filt_small_pixel_block(final_seg_unet)
