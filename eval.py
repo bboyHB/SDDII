@@ -288,6 +288,8 @@ def eval_compare():
                 final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
 
                 if dataset_name[-1] in ('4', '7', '0'):
+                    if dataset_name[-1] in ('0'):
+                        final_seg_unet = extract_biggest_connected_component(final_seg_unet)
                     if dataset_name[-1] in ('7', '0'):
                         final_seg_unet = thresh_combine_open_close(final_seg_unet)
                     inverse = np.array(final_seg_unet, dtype=np.uint8)
