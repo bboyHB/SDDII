@@ -293,6 +293,8 @@ def eval_compare():
                     inverse = np.array(final_seg_unet, dtype=np.uint8)
                     final_seg_unet[inverse == 0] = 255
                     final_seg_unet[inverse == 255] = 0
+                    if dataset_name[-1] == '7':
+                        final_seg_unet = extract_biggest_connected_component(final_seg_unet)
                 elif dataset_name[-1] == '6':
                     final_seg_unet = thresh_combine_open_close(final_seg_unet, 9, f=True, onlymax=True)
             # final_seg_unet = filt_small_pixel_block(final_seg_unet)
