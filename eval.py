@@ -287,6 +287,10 @@ def eval_compare():
                 diff[diff <= thresh_hold3] = 0
                 final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
                 final_seg_unet = thresh_combine_open_close(final_seg_unet)
+                if dataset_name[-1] == '4':
+                    inverse = np.array(final_seg_unet, dtype=np.uint8)
+                    final_seg_unet[inverse == 0] = 255
+                    final_seg_unet[inverse == 255] = 0
             # final_seg_unet = filt_small_pixel_block(final_seg_unet)
             # iu_unet = num_intersection_union(final_seg_unet, A_mask)
             # intersection_unet += iu_unet[0]
