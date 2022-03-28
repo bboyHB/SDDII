@@ -296,7 +296,8 @@ def eval_compare():
                     if dataset_name[-1] in ('7'):
                         final_seg_unet = extract_biggest_connected_component(final_seg_unet)
                     if dataset_name[-1] in ('0'):
-                        final_seg_unet = extract_biggest_connected_component(final_seg_unet)
+                        if opt.f:
+                            final_seg_unet = extract_biggest_connected_component(final_seg_unet)
                         final_seg_unet = cv2.morphologyEx(final_seg_unet, cv2.MORPH_CLOSE, np.ones((opt.third_kernel, opt.third_kernel), np.uint8))
                 elif dataset_name[-1] == '6':
                     final_seg_unet = thresh_combine_open_close(final_seg_unet, 9, f=True, onlymax=True)
