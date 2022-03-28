@@ -287,14 +287,13 @@ def eval_compare():
                 diff[diff <= thresh_hold3] = 0
                 final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
 
-                if dataset_name[-1] in ('4', '7', '0'):
+                if dataset_name[-1] in ('4', '7', '0', '9'):
                     if dataset_name[-1] in ('7'):
                         final_seg_unet = thresh_combine_open_close(final_seg_unet)
                     inverse = np.array(final_seg_unet, dtype=np.uint8)
-                    if opt.f:
-                        final_seg_unet[inverse == 0] = 255
-                        final_seg_unet[inverse == 255] = 0
-                    if dataset_name[-1] in ('7'):
+                    final_seg_unet[inverse == 0] = 255
+                    final_seg_unet[inverse == 255] = 0
+                    if dataset_name[-1] in ('7', '9'):
                         final_seg_unet = extract_biggest_connected_component(final_seg_unet)
                     if dataset_name[-1] in ('0'):
                         if opt.onlymax:
