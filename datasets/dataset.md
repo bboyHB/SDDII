@@ -36,7 +36,9 @@ python ./datasets/combine_A_and_B.py --fold_A ./datasets/DAGM_Class2_cycle_A_and
 python train.py --dataroot ./datasets/RSDDs1_pix2pix_AB --model pix2pix --name RSDDs1_pix2pix --direction BtoA --load_size 256 --crop_size 256 --ifeval --print_freq 5000
 python train.py --dataroot ./datasets/RSDDs2_pix2pix_AB --model pix2pix --name RSDDs2_pix2pix --direction BtoA --load_size 256 --crop_size 256
 python train.py --dataroot ./datasets/KSDD_pix2pix_AB --model pix2pix --name KSDD_pix2pix --direction BtoA --load_size 512 --crop_size 512
-python train.py --dataroot ./datasets/DAGM_Class8_pix2pix_AB --model pix2pix --name DAGM_Class8_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --input_nc 1 --output_nc 1 --n_epochs 25 --n_epochs_decay 25 --display_port 8097 --gpu_ids 1
+python train.py --dataroot ./datasets/DAGM_Class8_pix2pix_AB --model pix2pix --name DAGM_Class7_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --input_nc 1 --output_nc 1 --n_epochs 25 --n_epochs_decay 25 --display_port 8097 --gpu_ids 1
+python train.py --dataroot ./datasets/DAGM_Class8_pix2pix_AB --model pix2pix --name DAGM_Class5_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --input_nc 1 --output_nc 1 --n_epochs 25 --n_epochs_decay 25 --display_port 8097 --gpu_ids 1 --threshold 20
+python train.py --dataroot ./datasets/DAGM_Class7_pix2pix_AB --model pix2pix --name DAGM_Class8_pix2pix --direction BtoA --load_size 512 --crop_size 512 --ifeval --input_nc 1 --output_nc 1 --n_epochs 25 --n_epochs_decay 25 --display_port 8097 --gpu_ids 1 --threshold 20
 
 训练unet
 python train_unet.py --dataset DAGM_Class1
@@ -44,5 +46,10 @@ python train_unet.py --dataset DAGM_Class1
 运行
 python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --suffix _old --modelpath latest --epoch 100 --threshold 20 --eval_dataset_name DAGM_Class1
 python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --load_size 512 --crop_size 512 --output_nc 1 --modelpath 40 --epoch 50 --threshold3 127 --eval_dataset_name DAGM_Class10 --netG unet_256 --threshold 10 --threshold2 10 
+python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --load_size 512 --crop_size 512 --output_nc 1 --modelpath 25 --epoch 25 --threshold3 50 --eval_dataset_name DAGM_Class9 --netG unet_256 --threshold 20 --threshold2 10
+python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --load_size 512 --crop_size 512 --output_nc 1 --modelpath 50 --epoch 25 --threshold3 127 --eval_dataset_name DAGM_Class7 --netG unet_256 --threshold 10 --threshold2 5
+python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --load_size 512 --crop_size 512 --output_nc 1 --modelpath 50 --epoch 50 --threshold3 127 --eval_dataset_name DAGM_Class4 --netG unet_256 --threshold 5 --threshold2 10
+python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --load_size 512 --crop_size 512 --output_nc 1 --modelpath 50 --epoch 50 --threshold3 45 --eval_dataset_name DAGM_Class5 --netG unet_256 --threshold 20 --threshold2 10
+python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --load_size 512 --crop_size 512 --output_nc 1 --modelpath 50 --epoch 50 --threshold3 190 --eval_dataset_name DAGM_Class2 --netG unet_256 --threshold 14 --threshold2 15
 
 --f --first_kernel --onlymax

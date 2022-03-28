@@ -287,7 +287,7 @@ def eval_compare():
                 diff[diff <= thresh_hold3] = 0
                 final_seg_unet = diff.squeeze().cpu().numpy().astype(np.uint8)
 
-                if dataset_name[-1] in ('4', '7', '0', '9'):
+                if dataset_name[-1] in ('4', '7', '0', '9', '5'):
                     if dataset_name[-1] in ('7'):
                         final_seg_unet = thresh_combine_open_close(final_seg_unet)
                     inverse = np.array(final_seg_unet, dtype=np.uint8)
@@ -385,7 +385,7 @@ def eval_when_train_p2p(opt, R_p2p):
     if opt.name[:4] == 'RSDD':
         eval_path = './datasets/' + opt.name[:6] + '_origin/test'
     elif opt.name[:4] == 'DAGM':
-        eval_path = './datasets/' + opt.name[:11] + '_seg/Test'
+        eval_path = './datasets/' + opt.name[:11] + '_seg/test'
     else:
         eval_path = 'not_exist'
     img_path = os.path.join(eval_path, 'img')
