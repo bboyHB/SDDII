@@ -43,3 +43,6 @@ python train_unet.py --dataset DAGM_Class1
 
 运行
 python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --suffix _old --modelpath latest --epoch 100 --threshold 20 --eval_dataset_name DAGM_Class1
+python eval.py --load_size 512 --epoch_count 50 --lr 0.01 --input_nc 1 --load_size 512 --crop_size 512 --output_nc 1 --modelpath 40 --epoch 50 --threshold3 127 --eval_dataset_name DAGM_Class10 --netG unet_256 --threshold 10 --threshold2 10 
+
+--f --first_kernel --onlymax
