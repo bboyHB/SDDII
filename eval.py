@@ -291,12 +291,13 @@ def eval_compare():
                     if dataset_name[-1] in ('7'):
                         final_seg_unet = thresh_combine_open_close(final_seg_unet)
                     inverse = np.array(final_seg_unet, dtype=np.uint8)
-                    final_seg_unet[inverse == 0] = 255
-                    final_seg_unet[inverse == 255] = 0
+                    if opt.f:
+                        final_seg_unet[inverse == 0] = 255
+                        final_seg_unet[inverse == 255] = 0
                     if dataset_name[-1] in ('7'):
                         final_seg_unet = extract_biggest_connected_component(final_seg_unet)
                     if dataset_name[-1] in ('0'):
-                        if opt.f:
+                        if opt.onlymax:
                             final_seg_unet = extract_biggest_connected_component(final_seg_unet)
                         final_seg_unet = cv2.morphologyEx(final_seg_unet, cv2.MORPH_CLOSE, np.ones((opt.third_kernel, opt.third_kernel), np.uint8))
                 elif dataset_name[-1] == '6':
